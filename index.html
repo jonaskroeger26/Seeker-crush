@@ -235,27 +235,42 @@
         .candy-cell[data-type="2"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
         .candy-cell[data-type="3"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
         .candy-cell[data-type="4"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
-        .candy-cell.striped-h .candy-svg { opacity: 0.98; }
+        /* Striped (row/column clearer) — clear candy with bold stripe */
+        .candy-cell.striped-h .candy-svg { opacity: 1; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)) drop-shadow(0 0 10px rgba(255,255,255,0.15)); }
         .candy-cell.striped-h::after {
-            content: ''; position: absolute; inset: 22%; left: 0; right: 0;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
-            border-radius: 3px; pointer-events: none;
-            box-shadow: 0 0 8px rgba(255,255,255,0.2);
+            content: ''; position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+            height: 28%; min-height: 6px; max-height: 12px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 15%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0.5) 85%, transparent 100%);
+            border-radius: 4px; pointer-events: none;
+            box-shadow: 0 0 12px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.8) inset;
         }
+        .candy-cell.striped-v .candy-svg { opacity: 1; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)) drop-shadow(0 0 10px rgba(255,255,255,0.15)); }
         .candy-cell.striped-v::after {
-            content: ''; position: absolute; inset: 22%; top: 0; bottom: 0;
-            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
-            border-radius: 3px; pointer-events: none;
-            box-shadow: 0 0 8px rgba(255,255,255,0.2);
+            content: ''; position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 28%; min-width: 6px; max-width: 12px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.5) 15%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0.5) 85%, transparent 100%);
+            border-radius: 4px; pointer-events: none;
+            box-shadow: 0 0 12px rgba(255,255,255,0.4), 1px 0 0 rgba(255,255,255,0.8) inset;
         }
+        /* Wrapped (3x3 blast) — gift-wrap style border + glow */
+        .candy-cell.wrapped .candy-svg { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)) drop-shadow(0 0 8px rgba(255,200,255,0.3)); }
         .candy-cell.wrapped::after {
-            content: ''; position: absolute; inset: 3px;
-            border: 2px solid rgba(255,255,255,0.9);
-            border-radius: 10px;
+            content: ''; position: absolute; inset: 2px;
+            border-radius: 11px;
+            border: 2px solid rgba(255,255,255,0.95);
+            background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, rgba(255,200,255,0.08) 100%);
             pointer-events: none;
-            box-shadow: 0 0 14px rgba(255,255,255,0.25) inset, 0 0 20px rgba(255,255,255,0.15);
+            box-shadow: 0 0 16px rgba(255,220,255,0.3) inset, 0 0 20px rgba(255,180,220,0.2);
         }
-        .candy-cell.color-bomb .candy-svg-color-bomb { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)) drop-shadow(0 0 12px rgba(255,200,100,0.5)); }
+        /* Color bomb — rainbow ball with soft pulse */
+        .candy-cell.color-bomb .candy-svg-color-bomb {
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)) drop-shadow(0 0 16px rgba(255,200,120,0.5));
+            animation: color-bomb-glow 2s ease-in-out infinite;
+        }
+        @keyframes color-bomb-glow {
+            0%, 100% { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)) drop-shadow(0 0 14px rgba(255,200,120,0.45)); }
+            50% { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)) drop-shadow(0 0 22px rgba(255,220,140,0.65)); }
+        }
         .score-pop {
             position: fixed; z-index: 200;
             font-family: var(--font-ui); font-weight: 800; font-size: 2.1rem;
@@ -471,9 +486,11 @@
                                 <stop offset="75%" stopColor="#42a5f5"/>
                                 <stop offset="100%" stopColor="#ba68c8"/>
                             </linearGradient>
+                            <filter id={`cb-glow-${uid}`}><feGaussianBlur in="SourceGraphic" stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                         </defs>
-                        <circle cx="12" cy="12" r="9" fill={`url(#cb-${uid})`} stroke="rgba(255,255,255,0.9)" strokeWidth="1.2"/>
-                        <circle cx="12" cy="12" r="6" fill="rgba(255,255,255,0.25)"/>
+                        <circle cx="12" cy="12" r="9.5" fill={`url(#cb-${uid})`} stroke="rgba(255,255,255,0.95)" strokeWidth="1.5"/>
+                        <circle cx="12" cy="12" r="6" fill="rgba(255,255,255,0.2)"/>
+                        <path d="M12 7 L12.6 10.4 L16 11 L13 13.6 L13.6 17 L12 14.5 L10.4 17 L11 13.6 L8 11 L11.4 10.4 Z" fill="rgba(255,255,255,0.7)" filter={`url(#cb-glow-${uid})`}/>
                     </svg>
                 );
             }
