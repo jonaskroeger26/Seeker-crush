@@ -1,0 +1,26 @@
+{
+  "name": "candy-crush-solana-dapp",
+  "version": "1.0.0",
+  "description": "Candy Crush match-3 game as a Solana dApp with .skr domain integration",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:mwa": "node build-mwa.cjs",
+    "fetch-skr-domains": "node fetch-all-skr-domains-simple.js",
+    "convert-csv": "node convert-csv-to-lookup.js"
+  },
+  "dependencies": {
+    "@onsol/tldparser": "^0.5.2",
+    "@solana-mobile/wallet-standard-mobile": "^0.4.1",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-wallets": "^0.16.1",
+    "@solana/web3.js": "^1.87.6",
+    "@wallet-standard/core": "^1.0.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0",
+    "vite": "^7.3.1"
+  }
+}

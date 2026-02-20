@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Lilita+One&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
+            --radius-sm: 12px; --radius-md: 16px; --radius-lg: 22px; --radius-xl: 28px; --radius-full: 9999px;
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.15);
+            --shadow-md: 0 12px 32px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.08);
+            --shadow-strong: 0 24px 64px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.12);
+            --shadow-glow-pink: 0 0 48px rgba(255, 100, 140, 0.4), 0 0 96px rgba(255, 100, 140, 0.15);
+            --color-bg: #08060c;
+            --color-bg-elevated: #0f0d14;
+            --color-bg-card: rgba(18, 16, 26, 0.92);
+            --color-surface: rgba(255,255,255,0.05);
+            --color-border: rgba(255,255,255,0.08);
+            --color-border-strong: rgba(255,255,255,0.14);
+            --color-text: #f8f6fc;
+            --color-text-muted: rgba(255,255,255,0.58);
+            --color-accent: #ff6b94;
+            --color-accent-2: #ffc04d;
+            --color-success: #6bcf8c;
+            --font-ui: 'Outfit', system-ui, sans-serif;
+            --font-display: 'Lilita One', sans-serif;
+            --font-premium: 'Playfair Display', serif;
+        }
+        html, body { margin: 0; padding: 0; min-height: 100vh; height: 100%; }
+        #root { min-height: 100vh; height: 100%; display: block; }
+        body { font-family: var(--font-ui); -webkit-font-smoothing: antialiased; background: var(--color-bg); color: var(--color-text); }
+
+        #cc-loading {
+            position: fixed; inset: 0; z-index: 10000;
+            background: var(--color-bg);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: var(--space-8); box-sizing: border-box;
+        }
+        .cc-loading-logo {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 13vw, 4.25rem);
+            font-weight: 400;
+            letter-spacing: -0.04em;
+            color: var(--color-text);
+            margin-bottom: var(--space-2);
+            line-height: 1.02;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        .cc-loading-logo span { color: var(--color-accent); text-shadow: 0 0 40px rgba(255,107,148,0.35); }
+        .cc-loading-tagline {
+            font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.3em; color: var(--color-text-muted);
+            margin-bottom: var(--space-10);
+        }
+        .cc-loading-bar-wrap {
+            width: 100%; max-width: 260px; height: 5px;
+            background: rgba(255,255,255,0.06); border-radius: var(--radius-full);
+            overflow: hidden;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.2) inset;
+        }
+        .cc-loading-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
+            border-radius: var(--radius-full);
+            transition: width 0.12s ease-out;
+            box-shadow: 0 0 12px rgba(255,107,148,0.4);
+        }
+
+        .game-bg {
+            position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+            background: radial-gradient(ellipse 160% 120% at 50% -40%, rgba(55, 35, 85, 0.5) 0%, transparent 42%),
+                        radial-gradient(ellipse 100% 80% at 90% 110%, rgba(255, 90, 130, 0.08) 0%, transparent 48%),
+                        radial-gradient(ellipse 80% 100% at 10% 100%, rgba(100, 60, 180, 0.06) 0%, transparent 48%),
+                        linear-gradient(185deg, #06050a 0%, #0a0810 35%, #08060c 100%);
+        }
+        .game-bg::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.02) 1px, transparent 0);
+            background-size: 32px 32px;
+            pointer-events: none;
+        }
+        .game-bg::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 110% 90% at 50% 55%, transparent 45%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+        }
+        @keyframes board-in {
+            0% { opacity: 0; transform: scale(0.9) translateY(24px); }
+            78% { opacity: 1; transform: scale(1.02) translateY(0); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .board-outer {
+            padding: 28px;
+            background: linear-gradient(165deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.03) 22%, rgba(50,40,70,0.2) 55%, rgba(0,0,0,0.55) 100%);
+            border-radius: 32px;
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset, 0 3px 0 rgba(255,255,255,0.1), 0 44px 110px rgba(0,0,0,0.55), 0 0 80px rgba(70,35,100,0.12);
+            animation: board-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .board-inner {
+            position: relative;
+            padding: 18px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.9) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.65);
+            box-shadow: 0 14px 52px rgba(0,0,0,0.75) inset, 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(255,255,255,0.03) inset;
+        }
+        .board-inner::before {
+            content: '';
+            position: absolute; inset: 18px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.02) 100%);
+            pointer-events: none;
+        }
+
+        /* Premium slot: jewel well — crisp clip for animations, no bleed */
+        .candy-cell {
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            padding: 0;
+            transition: box-shadow 0.2s ease;
+            min-width: 0; min-height: 0;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.82) 100%);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.55) inset, 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(0,0,0,0.25) inset;
+            border: 1px solid rgba(0,0,0,0.4);
+            transform: translateZ(0);
+        }
+        .candy-cell::before {
+            content: '';
+            position: absolute; inset: 0;
+            border-radius: 14px;
+            background: linear-gradient(160deg, rgba(255,255,255,0.08) 0%, transparent 35%, rgba(0,0,0,0.25) 100%);
+            pointer-events: none;
+        }
+        .candy-cell::after {
+            content: '';
+            position: absolute; inset: 2px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.3) inset;
+            pointer-events: none;
+        }
+        .candy-cell:hover {
+            transform: scale(1.04);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5) inset, 0 1px 0 rgba(255,255,255,0.06), 0 12px 28px rgba(0,0,0,0.4);
+            transition: transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.2s ease;
+        }
+        .candy-cell:active { transform: scale(0.97); }
+        .candy-cell.swap-anim { animation: swap-slide 0.12s ease-out forwards; z-index: 2; }
+        @keyframes swap-slide {
+            from { transform: translate(0, 0); }
+            to { transform: translate(var(--swap-dx, 0), var(--swap-dy, 0)); }
+        }
+        @keyframes selected-pulse {
+            0%, 100% { transform: scale(1.06); box-shadow: 0 0 0 2px rgba(255,255,255,0.98), 0 0 0 5px var(--color-accent), 0 0 28px rgba(255,107,148,0.35), 0 6px 16px rgba(0,0,0,0.5) inset; }
+            50% { transform: scale(1.12); box-shadow: 0 0 0 2px rgba(255,255,255,0.98), 0 0 0 6px var(--color-accent), 0 0 48px rgba(255,107,148,0.55), 0 6px 16px rgba(0,0,0,0.5) inset; }
+        }
+        .candy-cell.selected {
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.98), 0 0 0 5px var(--color-accent), 0 0 40px rgba(255,107,148,0.45), 0 6px 16px rgba(0,0,0,0.5) inset !important;
+            animation: selected-pulse 1.35s ease-in-out infinite;
+        }
+        .menu-btn-primary { position: relative; overflow: hidden; }
+        .menu-btn-primary::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 45%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+        .menu-btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md), var(--shadow-glow-pink) !important; }
+        .menu-btn-primary:active { transform: translateY(0); }
+        .overlay-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md), var(--shadow-glow-pink) !important; }
+        .overlay-btn:active { transform: translateY(0); }
+
+        .hud-pill { }
+
+        /* Pop: like Candy Crush — simple grow then vanish, no overshoot/wiggle */
+        @keyframes candy-pop {
+            0% { transform: translateZ(0) scale(1); opacity: 1; }
+            35% { transform: translateZ(0) scale(1.2); opacity: 1; }
+            100% { transform: translateZ(0) scale(0); opacity: 0; }
+        }
+        .candy-cell.popping {
+            animation: candy-pop 0.16s ease-out forwards;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        /* Drop: simple grow from top, no bounce — like real Candy Crush */
+        @keyframes candy-drop-inner {
+            0% { transform: scaleY(0); opacity: 1; }
+            100% { transform: scaleY(1); opacity: 1; }
+        }
+        .candy-cell.dropping .candy-inner {
+            transform-origin: 50% 0%;
+            animation: candy-drop-inner 0.2s ease-out forwards;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            will-change: transform;
+        }
+        .candy-cell.dropping[data-row="0"] .candy-inner { animation-delay: 0ms; }
+        .candy-cell.dropping[data-row="1"] .candy-inner { animation-delay: 28ms; }
+        .candy-cell.dropping[data-row="2"] .candy-inner { animation-delay: 56ms; }
+        .candy-cell.dropping[data-row="3"] .candy-inner { animation-delay: 84ms; }
+        .candy-cell.dropping[data-row="4"] .candy-inner { animation-delay: 112ms; }
+        .candy-cell.dropping[data-row="5"] .candy-inner { animation-delay: 140ms; }
+        .candy-cell.dropping[data-row="6"] .candy-inner { animation-delay: 168ms; }
+        .candy-cell.dropping[data-row="7"] .candy-inner { animation-delay: 196ms; }
+        .candy-cell .candy-inner {
+            position: absolute; inset: 0;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+            transform: translateZ(0);
+        }
+        /* Single drop-shadow per candy for smoother paint */
+        .candy-cell .candy-svg {
+            width: 86%; height: 86%;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+        }
+        .candy-cell[data-type="0"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="1"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="2"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="3"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="4"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell.striped-h .candy-svg { opacity: 0.98; }
+        .candy-cell.striped-h::after {
+            content: ''; position: absolute; inset: 22%; left: 0; right: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+            border-radius: 3px; pointer-events: none;
+            box-shadow: 0 0 8px rgba(255,255,255,0.2);
+        }
+        .candy-cell.striped-v::after {
+            content: ''; position: absolute; inset: 22%; top: 0; bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+            border-radius: 3px; pointer-events: none;
+            box-shadow: 0 0 8px rgba(255,255,255,0.2);
+        }
+        .candy-cell.wrapped::after {
+            content: ''; position: absolute; inset: 3px;
+            border: 2px solid rgba(255,255,255,0.9);
+            border-radius: 10px;
+            pointer-events: none;
+            box-shadow: 0 0 14px rgba(255,255,255,0.25) inset, 0 0 20px rgba(255,255,255,0.15);
+        }
+        .candy-cell.color-bomb .candy-svg-color-bomb { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)) drop-shadow(0 0 12px rgba(255,200,100,0.5)); }
+        .score-pop {
+            position: fixed; z-index: 200;
+            font-family: var(--font-ui); font-weight: 800; font-size: 2.1rem;
+            color: #fff;
+            text-shadow: 0 0 48px rgba(255,107,148,0.95), 0 0 24px rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.4);
+            pointer-events: none;
+            left: 50%; top: 42%; transform: translate(-50%, -50%);
+            animation: scorePop 0.75s cubic-bezier(0.22, 1.1, 0.36, 1) forwards;
+        }
+        @keyframes scorePop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.35); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.45); }
+            28% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+            100% { opacity: 0; transform: translate(-50%, -95px) scale(1); }
+        }
+
+        /* Start menu: falling candy background */
+        .menu-fall-wrap { position: relative; overflow: hidden; min-height: 100vh; width: 100%; }
+        .menu-fall-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+        .menu-fall-candy {
+            position: absolute; width: 24px; height: 24px; border-radius: 50%;
+            opacity: 0.28; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: menu-fall 14s linear infinite;
+        }
+        .menu-fall-candy.square { border-radius: 6px; }
+        @keyframes menu-fall {
+            0% { transform: translateY(-40%) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
+        .menu-content { position: relative; z-index: 1; }
+
+        /* Level world — scrollable map background like Candy Crush */
+        .level-world {
+            position: fixed;
+            inset: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            z-index: 1;
+        }
+        .level-world__bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            min-height: 3200px;
+            background:
+                linear-gradient(180deg, rgba(45,35,75,0.97) 0%, rgba(28,22,48,0.98) 25%, rgba(22,18,38,0.99) 50%, rgba(18,14,32,0.99) 75%, rgba(12,10,24,0.99) 100%),
+                radial-gradient(ellipse 120% 40% at 50% 0%, rgba(255,120,160,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse 80% 30% at 20% 20%, rgba(120,80,180,0.08) 0%, transparent 45%),
+                radial-gradient(ellipse 80% 30% at 80% 60%, rgba(255,100,140,0.06) 0%, transparent 45%);
+            pointer-events: none;
+        }
+        .level-world__path {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            min-height: 3200px;
+            pointer-events: none;
+        }
+        .level-world__path svg {
+            display: block;
+            width: 100%;
+            min-height: 3200px;
+        }
+        .level-world__path path {
+            fill: none;
+            stroke: rgba(255,107,148,0.2);
+            stroke-width: 14;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .level-world__nodes {
+            position: relative;
+            min-height: 3200px;
+            padding: 24px 16px 120px;
+        }
+        .level-node {
+            position: absolute;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0a080c;
+            background: linear-gradient(160deg, #ff7a9e 0%, #ff6b94 40%, #ffb347 100%);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.3) inset, 0 4px 0 rgba(0,0,0,0.2), 0 8px 24px rgba(255,107,148,0.35);
+            margin-left: -28px;
+            left: 50%;
+        }
+        .level-node:nth-child(odd) { left: 22%; margin-left: -28px; }
+        .level-node:nth-child(even) { left: 78%; margin-left: -28px; }
+        .level-node:hover { transform: scale(1.1); box-shadow: 0 0 0 1px rgba(255,255,255,0.4) inset, 0 6px 0 rgba(0,0,0,0.2), 0 12px 32px rgba(255,107,148,0.45); }
+        .level-node--locked {
+            background: linear-gradient(180deg, rgba(60,55,85,0.7) 0%, rgba(40,36,60,0.85) 100%);
+            color: rgba(255,255,255,0.5);
+            cursor: default;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4) inset;
+            border-color: rgba(255,255,255,0.06);
+        }
+        .level-node--locked:hover { transform: none; }
+        .level-node--completed {
+            background: linear-gradient(160deg, #7bc96b 0%, #5a9e4e 50%, #3d8b32 100%);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.25) inset, 0 4px 0 rgba(0,0,0,0.15);
+        }
+        .level-node__num { font-size: 1.05rem; line-height: 1.2; }
+        .level-node__pts { font-size: 0.55rem; opacity: 0.9; font-weight: 600; margin-top: 0; }
+        .level-node--locked .level-node__pts { opacity: 0.6; }
+        .level-world__back {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0c0a0f">
+    <meta name="apple-mobile-web-app-title" content="Seeker Crush">
+    <title>Seeker Crush - Solana</title>
+    <link rel="manifest" href="manifest.json">
+    <script defer src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script defer src="https://unpkg.com/@onsol/tldparser@0.5.2/lib/index.iife.js"></script>
+    <script defer crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script defer crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="/mwa-bundle.js"></script>
+    <script>
+        if (typeof window.__snakeWalletAdapter === 'undefined') {
+            window.__snakeWalletAdapter = { ready: false, connect: null, disconnect: null };
+        }
+    </script>
+</head>
+<body>
+    <div id="cc-loading">
+        <div class="cc-loading-logo">Seeker <span>Crush</span></div>
+        <div class="cc-loading-tagline">Solana dApp</div>
+        <div class="cc-loading-bar-wrap"><div class="cc-loading-bar" id="cc-loading-bar"></div></div>
+    </div>
+    <div id="root"></div>
+    <script type="text/babel" data-type="module">
+        const { useState, useEffect, useRef } = React;
+
+        const SUPABASE_URL = 'https://aukbtnujqzilrqxgelxq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1a2J0bnVqcXppbHJxeGdlbHhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTc1NjQsImV4cCI6MjA4NTY5MzU2NH0.PGwNORkCQn_EztvA4EKoWYQZ3xlhS1a9g-NGPSTL6d4';
+        const supabase = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_KEY);
+
+        const CANDY_STYLES = [
+            { bg: 'linear-gradient(165deg, #ffcdd2 0%, #ff8a80 22%, #ff5252 55%, #c62828 85%, #8b0000 100%)', shadow: '0 8px 24px rgba(198,40,40,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.5)' },
+            { bg: 'linear-gradient(165deg, #fffde7 0%, #fff59d 22%, #ffeb3b 55%, #ffc107 85%, #ff8f00 100%)', shadow: '0 8px 24px rgba(255,193,7,0.4), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.55)' },
+            { bg: 'linear-gradient(165deg, #e8f5e9 0%, #a5d6a7 22%, #66bb6a 55%, #43a047 85%, #2e7d32 100%)', shadow: '0 8px 24px rgba(67,160,71,0.4), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.4)' },
+            { bg: 'linear-gradient(165deg, #e3f2fd 0%, #90caf9 22%, #42a5f5 55%, #1e88e5 85%, #1565c0 100%)', shadow: '0 8px 24px rgba(30,136,229,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.45)' },
+            { bg: 'linear-gradient(165deg, #f3e5f5 0%, #ce93d8 22%, #ba68c8 55%, #ab47bc 85%, #7b1fa2 100%)', shadow: '0 8px 24px rgba(171,71,188,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4)' }
+        ];
+        const COLS = 8;
+        const ROWS = 8;
+        const POINTS_PER_CANDY = 4;
+        const BONUS_4 = 8;
+        const BONUS_5 = 25;
+        const BONUS_CASCADE = 3;
+        const SWAP_MS = 120;
+        const POP_MS = 200;
+        const DROP_MS = 420;
+
+        const LEVELS = [
+            { moves: 20, targetScore: 350, numCandyTypes: 3 },
+            { moves: 22, targetScore: 420, numCandyTypes: 3 },
+            { moves: 24, targetScore: 500, numCandyTypes: 3 },
+            { moves: 20, targetScore: 600, numCandyTypes: 4 },
+            { moves: 22, targetScore: 720, numCandyTypes: 4 },
+            { moves: 24, targetScore: 850, numCandyTypes: 4 },
+            { moves: 20, targetScore: 1000, numCandyTypes: 5 },
+            { moves: 22, targetScore: 1150, numCandyTypes: 5 },
+            { moves: 24, targetScore: 1300, numCandyTypes: 5 },
+            { moves: 20, targetScore: 1450, numCandyTypes: 5 },
+            { moves: 18, targetScore: 1620, numCandyTypes: 5 },
+            { moves: 20, targetScore: 1800, numCandyTypes: 5 },
+            { moves: 22, targetScore: 2000, numCandyTypes: 5 },
+            { moves: 20, targetScore: 2200, numCandyTypes: 5 },
+            { moves: 18, targetScore: 2400, numCandyTypes: 5 },
+            { moves: 20, targetScore: 2650, numCandyTypes: 5 },
+            { moves: 22, targetScore: 2900, numCandyTypes: 5 },
+            { moves: 20, targetScore: 3200, numCandyTypes: 5 },
+            { moves: 18, targetScore: 3500, numCandyTypes: 5 },
+            { moves: 20, targetScore: 3800, numCandyTypes: 5 }
+        ];
+
+        function getRandomCandy(maxTypes) {
+            const n = maxTypes != null ? Math.min(maxTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
+            return Math.floor(Math.random() * n);
+        }
+
+        /* Seeker shapes: 0=Jelly Bean, 1=Lemon Drop, 2=Gum Square, 3=Lollipop, 4=Jujube Cluster; powerUp overrides for specials */
+        function CandyIcon({ type, cellKey, powerUp }) {
+            const w = 24, h = 24;
+            const uid = cellKey ? cellKey.replace(',', '-') : type;
+            if (powerUp === 'color-bomb') {
+                return (
+                    <svg className="candy-svg candy-svg-color-bomb" viewBox={`0 0 ${w} ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id={`cb-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#ff6b94"/>
+                                <stop offset="25%" stopColor="#ffc04d"/>
+                                <stop offset="50%" stopColor="#66bb6a"/>
+                                <stop offset="75%" stopColor="#42a5f5"/>
+                                <stop offset="100%" stopColor="#ba68c8"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="12" cy="12" r="9" fill={`url(#cb-${uid})`} stroke="rgba(255,255,255,0.9)" strokeWidth="1.2"/>
+                        <circle cx="12" cy="12" r="6" fill="rgba(255,255,255,0.25)"/>
+                    </svg>
+                );
+            }
+            if (type === 0) {
+                return (
+                    <svg className="candy-svg" viewBox={`0 0 ${w} ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs><linearGradient id={`jb-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#ff9e9e"/><stop offset="35%" stopColor="#ff5c5c"/><stop offset="70%" stopColor="#d32f2f"/><stop offset="100%" stopColor="#9a1a1a"/></linearGradient></defs>
+                        <ellipse cx="12" cy="12" rx="8" ry="5" fill={`url(#jb-${uid})`} stroke="#8b1515" strokeWidth="0.6"/>
+                        <ellipse cx="12" cy="11" rx="4" ry="2.5" fill="rgba(255,255,255,0.55)"/>
+                    </svg>
+                );
+            }
+            if (type === 1) {
+                return (
+                    <svg className="candy-svg" viewBox={`0 0 ${w} ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs><linearGradient id={`ld-${uid}`} x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stopColor="#fff9c4"/><stop offset="30%" stopColor="#fff176"/><stop offset="65%" stopColor="#ffc107"/><stop offset="100%" stopColor="#e65100"/></linearGradient></defs>
+                        <path d="M12 3 L16 10 Q18 12 16 14 L12 21 Q10 22 8 14 L4 10 Q2 8 4 6 L8 3 Q10 2 12 3z" fill={`url(#ld-${uid})`} stroke="#e65100" strokeWidth="0.55"/>
+                        <path d="M10 8 L12 6 L14 8 L12 11 Z" fill="rgba(255,255,255,0.6)"/>
+                    </svg>
+                );
+            }
+            if (type === 2) {
+                return (
+                    <svg className="candy-svg" viewBox={`0 0 ${w} ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs><linearGradient id={`gs-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#c8e6c9"/><stop offset="40%" stopColor="#81c784"/><stop offset="75%" stopColor="#388e3c"/><stop offset="100%" stopColor="#1b5e20"/></linearGradient></defs>
+                        <rect x="5" y="5" width="14" height="14" rx="3.5" ry="3.5" fill={`url(#gs-${uid})`} stroke="#2e7d32" strokeWidth="0.55"/>
+                        <rect x="8" y="8" width="8" height="8" rx="2" fill="rgba(255,255,255,0.4)"/>
+                    </svg>
+                );
+            }
+            if (type === 3) {
+                return (
+                    <svg className="candy-svg" viewBox={`0 0 ${w} ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs><linearGradient id={`lp-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#bbdefb"/><stop offset="40%" stopColor="#64b5f6"/><stop offset="75%" stopColor="#1976d2"/><stop offset="100%" stopColor="#0d47a1"/></linearGradient></defs>
+                        <circle cx="12" cy="10" r="7" fill={`url(#lp-${uid})`} stroke="#0d47a1" strokeWidth="0.55"/>
+                        <path d="M12 17 L12 22" stroke="#4e342e" strokeWidth="1.6" strokeLinecap="round"/>
+                        <ellipse cx="12" cy="8" rx="3" ry="2.5" fill="rgba(255,255,255,0.6)"/>
+                    </svg>
+                );
+            }
+            if (type === 4) {
+                return (
+                    <svg className="candy-svg" viewBox={`0 0 ${w} ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs><linearGradient id={`juc-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#e1bee7"/><stop offset="40%" stopColor="#ba68c8"/><stop offset="75%" stopColor="#8e24aa"/><stop offset="100%" stopColor="#4a148c"/></linearGradient></defs>
+                        <circle cx="9" cy="10" r="4.5" fill={`url(#juc-${uid})`} stroke="#4a148c" strokeWidth="0.5"/>
+                        <circle cx="15" cy="10" r="4.5" fill={`url(#juc-${uid})`} stroke="#4a148c" strokeWidth="0.5"/>
+                        <circle cx="12" cy="15" r="4.5" fill={`url(#juc-${uid})`} stroke="#4a148c" strokeWidth="0.5"/>
+                        <circle cx="10" cy="12" r="2" fill="rgba(255,255,255,0.5)"/>
+                        <circle cx="14" cy="12" r="2" fill="rgba(255,255,255,0.5)"/>
+                    </svg>
+                );
+            }
+            return null;
+        }
+
+        function createGrid(numCandyTypes) {
+            const maxT = numCandyTypes != null ? Math.min(numCandyTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
+            const grid = [];
+            for (let r = 0; r < ROWS; r++) {
+                grid[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    let candy = getRandomCandy(maxT);
+                    while ((c >= 2 && grid[r][c-1] === candy && grid[r][c-2] === candy) ||
+                           (r >= 2 && grid[r-1]?.[c] === candy && grid[r-2]?.[c] === candy)) {
+                        candy = getRandomCandy(maxT);
+                    }
+                    grid[r][c] = candy;
+                }
+            }
+            return grid;
+        }
+
+        function createPowerUpGrid() {
+            return Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
+        }
+
+        function findMatches(grid) {
+            const set = new Set();
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c <= COLS - 3; c++) {
+                    const v = grid[r][c];
+                    if (v === grid[r][c+1] && v === grid[r][c+2]) {
+                        set.add(`${r},${c}`); set.add(`${r},${c+1}`); set.add(`${r},${c+2}`);
+                    }
+                }
+            }
+            for (let c = 0; c < COLS; c++) {
+                for (let r = 0; r <= ROWS - 3; r++) {
+                    const v = grid[r][c];
+                    if (v === grid[r+1]?.[c] && v === grid[r+2]?.[c]) {
+                        set.add(`${r},${c}`); set.add(`${r+1},${c}`); set.add(`${r+2},${c}`);
+                    }
+                }
+            }
+            return Array.from(set).map(s => s.split(',').map(Number));
+        }
+
+        function findRuns(grid) {
+            const runs = [];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c <= COLS - 3; c++) {
+                    const v = grid[r][c];
+                    let len = 1;
+                    while (c + len < COLS && grid[r][c + len] === v) len++;
+                    if (len >= 3) {
+                        runs.push({ coords: Array.from({ length: len }, (_, i) => [r, c + i]), dir: 'h', length: len });
+                        c += len - 1;
+                    }
+                }
+            }
+            for (let c = 0; c < COLS; c++) {
+                for (let r = 0; r <= ROWS - 3; r++) {
+                    const v = grid[r][c];
+                    let len = 1;
+                    while (r + len < ROWS && grid[r + len][c] === v) len++;
+                    if (len >= 3) {
+                        runs.push({ coords: Array.from({ length: len }, (_, i) => [r + i, c]), dir: 'v', length: len });
+                        r += len - 1;
+                    }
+                }
+            }
+            return runs;
+        }
+
+        function getCellsToRemoveAndPowerUps(grid, powerUpGrid, matchCoords) {
+            const toRemove = new Set(matchCoords.map(([r,c]) => `${r},${c}`));
+            const runs = findRuns(grid);
+            const horRuns = runs.filter(r => r.dir === 'h');
+            const verRuns = runs.filter(r => r.dir === 'v');
+            const wrappedCells = new Set();
+            horRuns.forEach(hr => {
+                verRuns.forEach(vr => {
+                    const hSet = new Set(hr.coords.map(([r,c]) => `${r},${c}`));
+                    const shared = vr.coords.filter(([r,c]) => hSet.has(`${r},${c}`));
+                    if (shared.length === 1 && hr.length + vr.length - 1 >= 5) {
+                        const [r, c] = shared[0];
+                        wrappedCells.add(`${r},${c}`);
+                        powerUpGrid[r][c] = 'wrapped';
+                    }
+                });
+            });
+            runs.forEach(run => {
+                if (run.length === 4) {
+                    const [r, c] = run.coords[1];
+                    if (powerUpGrid[r][c] !== 'wrapped')
+                        powerUpGrid[r][c] = run.dir === 'h' ? 'striped-h' : 'striped-v';
+                } else if (run.length >= 5 && (run.dir === 'h' || run.dir === 'v')) {
+                    const [r, c] = run.coords[Math.floor(run.length / 2)];
+                    if (powerUpGrid[r][c] !== 'wrapped')
+                        powerUpGrid[r][c] = 'color-bomb';
+                }
+            });
+            const snapshot = Array.from(toRemove);
+            snapshot.forEach(key => {
+                const [r, c] = key.split(',').map(Number);
+                const pu = powerUpGrid[r][c];
+                if (pu === 'striped-h') {
+                    for (let col = 0; col < COLS; col++) toRemove.add(`${r},${col}`);
+                } else if (pu === 'striped-v') {
+                    for (let row = 0; row < ROWS; row++) toRemove.add(`${row},${c}`);
+                } else if (pu === 'wrapped') {
+                    for (let dr = -1; dr <= 1; dr++)
+                        for (let dc = -1; dc <= 1; dc++) {
+                            const nr = r + dr, nc = c + dc;
+                            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) toRemove.add(`${nr},${nc}`);
+                        }
+                } else if (pu === 'color-bomb') {
+                    const color = grid[r][c];
+                    for (let rr = 0; rr < ROWS; rr++)
+                        for (let cc = 0; cc < COLS; cc++)
+                            if (grid[rr][cc] === color) toRemove.add(`${rr},${cc}`);
+                }
+            });
+            return Array.from(toRemove).map(s => s.split(',').map(Number));
+        }
+
+        function removeAndDrop(grid, powerUpGrid, toRemove, numCandyTypes) {
+            const maxT = numCandyTypes != null ? Math.min(numCandyTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
+            const colsToDrop = new Set(toRemove.map(([r,c]) => c));
+            for (const c of colsToDrop) {
+                const colCells = [];
+                const colPowers = [];
+                for (let r = 0; r < ROWS; r++) {
+                    if (!toRemove.some(([mr,mc]) => mr === r && mc === c)) {
+                        colCells.push(grid[r][c]);
+                        colPowers.push(powerUpGrid[r][c]);
+                    }
+                }
+                const removed = ROWS - colCells.length;
+                for (let i = 0; i < removed; i++) {
+                    colCells.unshift(getRandomCandy(maxT));
+                    colPowers.unshift(null);
+                }
+                for (let r = 0; r < ROWS; r++) {
+                    grid[r][c] = colCells[r];
+                    powerUpGrid[r][c] = colPowers[r];
+                }
+            }
+        }
+
+        function swap(grid, powerUpGrid, r1, c1, r2, c2) {
+            const t = grid[r1][c1];
+            grid[r1][c1] = grid[r2][c2];
+            grid[r2][c2] = t;
+            const p = powerUpGrid[r1][c1];
+            powerUpGrid[r1][c1] = powerUpGrid[r2][c2];
+            powerUpGrid[r2][c2] = p;
+        }
+
+        function areAdjacent(r1, c1, r2, c2) {
+            return (Math.abs(r1 - r2) === 1 && c1 === c2) || (Math.abs(c1 - c2) === 1 && r1 === r2);
+        }
+
+        function Match3Game({ levelIndex, onGameOver, onLevelComplete, onNextLevel, walletAddress, skrName }) {
+            const level = LEVELS[levelIndex] || LEVELS[0];
+            const [grid, setGrid] = useState(() => createGrid(level.numCandyTypes));
+            const [powerUpGrid, setPowerUpGrid] = useState(() => createPowerUpGrid());
+            const [score, setScore] = useState(0);
+            const [movesLeft, setMovesLeft] = useState(level.moves);
+            const [dragStart, setDragStart] = useState(null);
+            const [dragCurrent, setDragCurrent] = useState(null);
+            const [animatingOut, setAnimatingOut] = useState(new Set());
+            const [animatingDrop, setAnimatingDrop] = useState(new Set());
+            const [swapAnim, setSwapAnim] = useState(null);
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [gameOver, setGameOver] = useState(false);
+            const [levelResult, setLevelResult] = useState(null);
+            const [scorePopups, setScorePopups] = useState([]);
+            const popupIdRef = useRef(0);
+            const boardRef = useRef(null);
+
+            const addScorePopup = (value) => {
+                const id = ++popupIdRef.current;
+                setScorePopups(prev => [...prev, { id, value }]);
+                setTimeout(() => setScorePopups(prev => prev.filter(p => p.id !== id)), 780);
+            };
+
+            const processMatchCycle = useRef((g, pug, cascadeLevel, onPoints) => {
+                const matchCoords = findMatches(g);
+                if (matchCoords.length === 0) return false;
+                const runs = findRuns(g);
+                const toRemove = getCellsToRemoveAndPowerUps(g, pug, matchCoords);
+                let points = toRemove.length * POINTS_PER_CANDY;
+                const maxRun = runs.length ? Math.max(...runs.map(r => r.length)) : 3;
+                if (maxRun >= 5) points += BONUS_5;
+                else if (maxRun >= 4) points += BONUS_4;
+                points += cascadeLevel * BONUS_CASCADE;
+                removeAndDrop(g, pug, toRemove, level.numCandyTypes);
+                onPoints(points);
+                return true;
+            });
+
+            const trySwap = (r1, c1, r2, c2) => {
+                if (gameOver || isProcessing || movesLeft <= 0 || !areAdjacent(r1, c1, r2, c2)) return;
+                const g = grid.map(row => [...row]);
+                const pug = powerUpGrid.map(row => [...row]);
+                swap(g, pug, r1, c1, r2, c2);
+                const matches = findMatches(g);
+                if (matches.length === 0) return;
+                setDragStart(null);
+                setDragCurrent(null);
+                setIsProcessing(true);
+                setMovesLeft(m => m - 1);
+                const toRemove = getCellsToRemoveAndPowerUps(g, pug, matches);
+                const runs = findRuns(g);
+                let points = toRemove.length * POINTS_PER_CANDY;
+                const maxRun = runs.length ? Math.max(...runs.map(r => r.length)) : 3;
+                if (maxRun >= 5) points += BONUS_5;
+                else if (maxRun >= 4) points += BONUS_4;
+                let totalPoints = points;
+                setSwapAnim({ r1, c1, r2, c2 });
+                setTimeout(() => {
+                    setGrid(g.map(row => [...row]));
+                    setPowerUpGrid(pug.map(row => [...row]));
+                    setSwapAnim(null);
+                    setAnimatingOut(new Set(toRemove.map(([r,c]) => `${r},${c}`)));
+                    setTimeout(() => {
+                        removeAndDrop(g, pug, toRemove, level.numCandyTypes);
+                        const dropSet = new Set();
+                        for (let c = 0; c < COLS; c++) {
+                            const removedInCol = toRemove.filter(([rr, cc]) => cc === c).length;
+                            for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
+                        }
+                        const nextGrid = g.map(row => [...row]);
+                        const nextPug = pug.map(row => [...row]);
+                        requestAnimationFrame(() => {
+                            setAnimatingDrop(dropSet);
+                            setGrid(nextGrid);
+                            setPowerUpGrid(nextPug);
+                            setAnimatingOut(new Set());
+                            setScore(s => { addScorePopup(points); return s + points; });
+                        });
+                        setTimeout(() => {
+                            setAnimatingDrop(new Set());
+                            const runCascade = (cascadeLevel) => {
+                            const matchCoords = findMatches(g);
+                            if (matchCoords.length === 0) {
+                                setGrid([...g.map(row => [...row])]);
+                                setPowerUpGrid(pug.map(row => [...row]));
+                                setIsProcessing(false);
+                                const finalScore = score + totalPoints;
+                                if (movesLeft - 1 <= 0) {
+                                    const won = finalScore >= level.targetScore;
+                                    setGameOver(true);
+                                    setLevelResult(won ? 'win' : 'lose');
+                                    setScore(finalScore);
+                                    setTimeout(() => {
+                                        if (supabase && walletAddress) {
+                                            supabase.from('leaderboards').insert({
+                                                wallet_address: walletAddress,
+                                                skr_name: skrName || null,
+                                                score: finalScore,
+                                                game_mode: 'seeker_crush',
+                                                difficulty: 'classic'
+                                            }).then(() => {});
+                                        }
+                                        const won = finalScore >= level.targetScore;
+                                        if (won && onLevelComplete) onLevelComplete(levelIndex);
+                                        if (onGameOver) onGameOver(finalScore, levelIndex, won);
+                                    }, 400);
+                                }
+                                return;
+                            }
+                            const nextToRemove = getCellsToRemoveAndPowerUps(g, pug, matchCoords);
+                            const nextRuns = findRuns(g);
+                            let nextPoints = nextToRemove.length * POINTS_PER_CANDY;
+                            const nextMaxRun = nextRuns.length ? Math.max(...nextRuns.map(r => r.length)) : 3;
+                            if (nextMaxRun >= 5) nextPoints += BONUS_5;
+                            else if (nextMaxRun >= 4) nextPoints += BONUS_4;
+                            nextPoints += cascadeLevel * BONUS_CASCADE;
+                            totalPoints += nextPoints;
+                            setAnimatingOut(new Set(nextToRemove.map(([r,c]) => `${r},${c}`)));
+                            setTimeout(() => {
+                                removeAndDrop(g, pug, nextToRemove, level.numCandyTypes);
+                                const dropSet = new Set();
+                                for (let c = 0; c < COLS; c++) {
+                                    const removedInCol = nextToRemove.filter(([rr, cc]) => cc === c).length;
+                                    for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
+                                }
+                                const nextGrid = g.map(row => [...row]);
+                                const nextPug = pug.map(row => [...row]);
+                                requestAnimationFrame(() => {
+                                    setAnimatingDrop(dropSet);
+                                    setGrid(nextGrid);
+                                    setPowerUpGrid(nextPug);
+                                    setAnimatingOut(new Set());
+                                    setScore(s => { addScorePopup(nextPoints); return s + nextPoints; });
+                                });
+                                setTimeout(() => {
+                                    setAnimatingDrop(new Set());
+                                    runCascade(cascadeLevel + 1);
+                                }, DROP_MS);
+                            }, POP_MS);
+                        };
+                                runCascade(1);
+                        }, DROP_MS);
+                    }, POP_MS);
+                }, SWAP_MS);
+            };
+
+            const handlePointerDown = (r, c) => {
+                if (gameOver || isProcessing || movesLeft <= 0) return;
+                setDragStart({ r, c });
+                setDragCurrent({ r, c });
+            };
+
+            const handlePointerEnter = (r, c) => {
+                if (dragStart) setDragCurrent({ r, c });
+            };
+
+            const handlePointerUp = () => {
+                if (dragStart && dragCurrent && (dragStart.r !== dragCurrent.r || dragStart.c !== dragCurrent.c)) {
+                    trySwap(dragStart.r, dragStart.c, dragCurrent.r, dragCurrent.c);
+                } else {
+                    setDragStart(null);
+                    setDragCurrent(null);
+                }
+            };
+
+            useEffect(() => {
+                const up = () => handlePointerUp();
+                document.addEventListener('pointerup', up);
+                document.addEventListener('pointercancel', up);
+                return () => { document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up); };
+            }, [dragStart, dragCurrent, grid, powerUpGrid, movesLeft, isProcessing, gameOver]);
+
+            return (
+                <div className="game-screen" style={styles.gameScreen}>
+                    <div className="game-bg" aria-hidden="true" />
+                    {scorePopups.map(p => (
+                        <div key={p.id} className="score-pop">+{p.value}</div>
+                    ))}
+                    <div className="game-hud" style={styles.hud}>
+                        <div className="hud-pill" style={styles.statPill}><span style={styles.statLabel}>Level</span> <span style={styles.statValueMoves}>{levelIndex + 1}</span></div>
+                        <div className="hud-pill" style={styles.statPill}><span style={styles.statLabel}>Score</span> <span style={styles.statValue}>{score}</span> <span style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>/ {level.targetScore}</span></div>
+                        <div className="hud-pill" style={styles.statPill}><span style={styles.statLabel}>Moves</span> <span style={styles.statValueMoves}>{movesLeft}</span></div>
+                    </div>
+                    <div className="grid-wrap" style={styles.gridWrap} ref={boardRef}>
+                        <div className="board-outer">
+                        <div className="board-inner">
+                        <div style={styles.grid}>
+                            {grid.map((row, r) => row.map((candy, c) => {
+                                const key = `${r},${c}`;
+                                const isDragStart = dragStart && dragStart.r === r && dragStart.c === c;
+                                const isDragCurrent = dragCurrent && dragCurrent.r === r && dragCurrent.c === c;
+                                const isSelected = isDragStart || isDragCurrent;
+                                const pu = powerUpGrid[r][c];
+                                const isSwapFrom = swapAnim && swapAnim.r1 === r && swapAnim.c1 === c;
+                                const isSwapTo = swapAnim && swapAnim.r2 === r && swapAnim.c2 === c;
+                                const swapStyle = (isSwapFrom || isSwapTo) && swapAnim ? {
+                                    '--swap-dx': `${(isSwapFrom ? swapAnim.c2 - swapAnim.c1 : swapAnim.c1 - swapAnim.c2) * 100}%`,
+                                    '--swap-dy': `${(isSwapFrom ? swapAnim.r2 - swapAnim.r1 : swapAnim.r1 - swapAnim.r2) * 100}%`
+                                } : undefined;
+                                return (
+                                    <div
+                                        key={key}
+                                        role="button"
+                                        tabIndex={0}
+                                        data-row={r}
+                                        data-type={candy}
+                                        className={'candy-cell' + (animatingOut.has(key) ? ' popping' : '') + (animatingDrop.has(key) ? ' dropping' : '') + (isSelected && dragStart && (dragStart.r !== dragCurrent?.r || dragStart.c !== dragCurrent?.c) ? ' selected' : '') + ((isSwapFrom || isSwapTo) ? ' swap-anim' : '') + (pu ? ' ' + pu : '')}
+                                        style={swapStyle ? { ...styles.candy, ...swapStyle } : styles.candy}
+                                        onPointerDown={(e) => { e.preventDefault(); handlePointerDown(r, c); }}
+                                        onPointerEnter={() => handlePointerEnter(r, c)}
+                                    >
+                                        <div className="candy-inner">
+                                            <CandyIcon type={candy} cellKey={key} powerUp={pu} />
+                                        </div>
+                                    </div>
+                                );
+                            }))}
+                        </div>
+                        </div>
+                        </div>
+                    </div>
+                    {gameOver && (
+                        <div style={styles.overlay}>
+                            <div style={styles.overlayTitle}>{levelResult === 'win' ? 'Level Complete!' : 'Game Over'}</div>
+                            <div style={styles.overlayScore}>Score <span style={styles.overlayScoreNum}>{score}</span></div>
+                            {levelResult === 'win' && <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Target was {level.targetScore}</div>}
+                            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                                {levelResult === 'win' && levelIndex < LEVELS.length - 1 && (
+                                    <button className="overlay-btn" style={styles.overlayBtn} onClick={() => { if (onLevelComplete) onLevelComplete(levelIndex); if (onNextLevel) onNextLevel(levelIndex); }}>Next Level</button>
+                                )}
+                                {levelResult === 'lose' && <button className="overlay-btn" style={styles.overlayBtn} onClick={() => { setGameOver(false); setLevelResult(null); setGrid(createGrid(level.numCandyTypes)); setPowerUpGrid(Array(ROWS).fill(null).map(() => Array(COLS).fill(null))); setScore(0); setMovesLeft(level.moves); }}>Retry</button>}
+                                <button className="overlay-btn" style={{ ...styles.overlayBtn, background: levelResult === 'win' ? 'var(--color-surface)' : undefined, border: '1px solid var(--color-border-strong)' }} onClick={() => onGameOver && onGameOver(score, levelIndex, levelResult === 'win')}>Back to Menu</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const styles = {
+            gameScreen: { width: '100%', minHeight: '100vh', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1, touchAction: 'none' },
+            hud: { position: 'absolute', top: 20, left: 20, right: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10, gap: 12 },
+            statPill: { background: 'rgba(12,10,18,0.9)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', padding: '18px 26px', borderRadius: 'var(--radius-lg)', fontSize: '0.95rem', color: 'var(--color-text)', fontWeight: 700, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.2) inset, 0 1px 0 rgba(255,255,255,0.05)' },
+            statLabel: { color: 'var(--color-text-muted)', fontSize: '0.75rem', marginRight: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' },
+            statValue: { color: 'var(--color-accent)', fontWeight: 800, letterSpacing: '-0.02em' },
+            statValueMoves: { color: 'var(--color-accent-2)', fontWeight: 800, letterSpacing: '-0.02em' },
+            gridWrap: { width: '100%', maxWidth: 400, display: 'flex', justifyContent: 'center', zIndex: 2, padding: '0 16px' },
+            grid: { display: 'grid', gridTemplateColumns: `repeat(${COLS}, 1fr)`, gap: 6, width: 'min(84vmin, 320px)', height: 'min(84vmin, 320px)', flexShrink: 0, contain: 'layout style paint' },
+            candy: { width: '100%', height: '100%', padding: 0 },
+            overlay: { position: 'absolute', inset: 0, background: 'rgba(8,6,12,0.96)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 40, zIndex: 100, padding: 40 },
+            overlayTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(2.6rem, 10vw, 3.6rem)', fontWeight: 400, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1.05, textShadow: '0 4px 28px rgba(0,0,0,0.55), 0 0 48px rgba(255,107,148,0.2)' },
+            overlayScore: { fontSize: '1.15rem', color: 'var(--color-text-muted)', fontWeight: 600, letterSpacing: '0.04em' },
+            overlayScoreNum: { color: 'var(--color-accent)', fontWeight: 800, fontSize: '1.75rem', textShadow: '0 0 32px rgba(255,107,148,0.5)' },
+            overlayBtn: { padding: '22px 52px', background: 'linear-gradient(160deg, #ff7a9e 0%, #ff6b94 40%, #ffb347 100%)', color: '#0a080c', border: 'none', borderRadius: 'var(--radius-lg)', fontWeight: 700, cursor: 'pointer', fontSize: '1.1rem', fontFamily: 'var(--font-ui)', boxShadow: '0 0 0 1px rgba(255,255,255,0.3) inset, 0 6px 0 rgba(0,0,0,0.12), 0 16px 44px rgba(255,107,148,0.45)', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }
+        };
+
+        const STORAGE_KEY = 'seeker_crush_unlocked_level';
+        function getStoredUnlocked() {
+            try {
+                const v = parseInt(localStorage.getItem(STORAGE_KEY) || '1', 10);
+                return Math.min(20, Math.max(1, isNaN(v) ? 1 : v));
+            } catch (_) { return 1; }
+        }
+
+        function App() {
+            const [screen, setScreen] = useState('menu');
+            const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
+            const [unlockedLevel, setUnlockedLevel] = useState(() => getStoredUnlocked());
+            const [walletAddress, setWalletAddress] = useState(null);
+            const [skrName, setSkrName] = useState(null);
+            const [leaderboard, setLeaderboard] = useState([]);
+            const adapter = window.__snakeWalletAdapter;
+
+            useEffect(() => {
+                if (adapter?.connectedAccount?.address) {
+                    setWalletAddress(adapter.connectedAccount.address);
+                    const apiBase = typeof location !== 'undefined' ? location.origin : '';
+                    fetch(`${apiBase}/api/get-skr-domain?wallet=${encodeURIComponent(adapter.connectedAccount.address)}`)
+                        .then(r => r.json()).then(d => { if (d.domain) setSkrName(d.domain); }).catch(() => {});
+                } else {
+                    setWalletAddress(null);
+                    setSkrName(null);
+                }
+            }, [adapter?.connectedAccount?.address]);
+
+            useEffect(() => {
+                if (screen !== 'leaderboard' || !supabase) return;
+                supabase.rpc('get_best_scores', { p_game_mode: 'seeker_crush', p_difficulty: 'classic' })
+                    .then(({ data }) => setLeaderboard(data || []))
+                    .catch(() => setLeaderboard([]));
+            }, [screen]);
+
+            const connectWallet = async () => {
+                if (adapter?.connect) await adapter.connect();
+            };
+            const disconnectWallet = () => {
+                if (adapter?.disconnect) adapter.disconnect();
+            };
+
+            const menuStyle = {
+                minHeight: '100vh',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                padding: '56px 28px', maxWidth: 420, margin: '0 auto'
+            };
+            const btnPrimary = {
+                width: '100%', maxWidth: 340, padding: '22px 40px',
+                background: 'linear-gradient(160deg, #ff7a9e 0%, #ff6b94 35%, #ffb347 100%)',
+                color: '#0a080c', border: 'none', borderRadius: 'var(--radius-lg)',
+                fontSize: '1.08rem', fontWeight: 700, cursor: 'pointer', marginBottom: 14,
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.35) inset, 0 4px 0 rgba(0,0,0,0.15), 0 14px 40px rgba(255,107,148,0.4)',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                fontFamily: 'var(--font-ui)'
+            };
+            const btnSecondary = {
+                ...btnPrimary, background: 'rgba(255,255,255,0.06)', color: 'var(--color-text)',
+                border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)', marginBottom: 14
+            };
+
+            return (
+                <div style={{ minHeight: '100vh', height: screen === 'game' ? '100vh' : undefined, background: screen === 'game' ? 'transparent' : 'var(--color-bg)', color: 'var(--color-text)', fontFamily: 'var(--font-ui)' }}>
+                    {screen === 'menu' && (
+                        <div className="menu-fall-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                            <div className="menu-fall-bg" aria-hidden="true">
+                                {[
+                                    { left: '8%', delay: 0, bg: 'linear-gradient(165deg, #ffcdd2 0%, #ff5252 50%, #c62828 100%)' },
+                                    { left: '22%', delay: 2, bg: 'linear-gradient(165deg, #fff59d 0%, #ffeb3b 50%, #ff8f00 100%)', square: true },
+                                    { left: '38%', delay: 4, bg: 'linear-gradient(165deg, #a5d6a7 0%, #66bb6a 50%, #2e7d32 100%)' },
+                                    { left: '54%', delay: 1, bg: 'linear-gradient(165deg, #90caf9 0%, #42a5f5 50%, #1565c0 100%)', square: true },
+                                    { left: '70%', delay: 3, bg: 'linear-gradient(165deg, #ce93d8 0%, #ba68c8 50%, #7b1fa2 100%)' },
+                                    { left: '86%', delay: 5, bg: 'linear-gradient(165deg, #ff8a80 0%, #ff6b94 50%, #e91e63 100%)', square: true },
+                                    { left: '15%', delay: 7, bg: 'linear-gradient(165deg, #ffeb3b 0%, #ffc107 100%)' },
+                                    { left: '78%', delay: 6, bg: 'linear-gradient(165deg, #42a5f5 0%, #ab47bc 100%)' },
+                                    { left: '45%', delay: 8, bg: 'linear-gradient(165deg, #ff6b94 0%, #ffc04d 100%)', square: true },
+                                ].map((c, i) => (
+                                    <div
+                                        key={i}
+                                        className={'menu-fall-candy' + (c.square ? ' square' : '')}
+                                        style={{ left: c.left, background: c.bg, animationDelay: `${c.delay}s` }}
+                                    />
+                                ))}
+                            </div>
+                            <div className="menu-content" style={menuStyle}>
+                                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.9rem, 12vw, 4rem)', fontWeight: 400, marginBottom: 12, letterSpacing: '-0.04em', lineHeight: 1, textShadow: '0 3px 24px rgba(0,0,0,0.4)', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.05em' }}>
+                                    <span style={{ color: 'var(--color-text)' }}>Seeker</span>
+                                    <span style={{ background: 'linear-gradient(135deg, #ff8fab 0%, #ffc04d 50%, #ff6b94 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Crush</span>
+                                </h1>
+                                <p style={{ fontFamily: 'var(--font-premium)', color: 'var(--color-text-muted)', fontSize: '0.72rem', marginBottom: 48, letterSpacing: '0.35em', textTransform: 'uppercase', fontWeight: 600 }}>Solana dApp</p>
+                                <button className="menu-btn-primary" style={btnPrimary} onClick={() => (setCurrentLevelIndex(Math.min(unlockedLevel, 20) - 1), setScreen('game'))}>Play</button>
+                                <button className="menu-btn-primary" style={btnPrimary} onClick={() => setScreen('levels')}>Levels</button>
+                                <button className="menu-btn-primary" style={btnPrimary} onClick={() => setScreen('leaderboard')}>Leaderboard</button>
+                                <div style={{ marginTop: 32, paddingTop: 32, borderTop: '1px solid var(--color-border)', width: '100%', maxWidth: 320, textAlign: 'center' }}>
+                                    {walletAddress ? (
+                                        <>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--color-accent)', marginBottom: 12, fontWeight: 600 }}>{skrName || walletAddress.slice(0,8)+'…'}</div>
+                                            <button style={{ ...btnSecondary, padding: '12px 24px', fontSize: '0.9rem' }} onClick={disconnectWallet}>Disconnect</button>
+                                        </>
+                                    ) : (
+                                        <button className="menu-btn-primary" style={btnPrimary} onClick={connectWallet}>Connect Wallet</button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {screen === 'game' && (
+                        <Match3Game
+                            key={currentLevelIndex}
+                            levelIndex={currentLevelIndex}
+                            onGameOver={(finalScore, levelIdx, won) => {
+                                if (won && levelIdx != null) {
+                                    const next = Math.max(unlockedLevel, levelIdx + 2);
+                                    setUnlockedLevel(next);
+                                    try { localStorage.setItem(STORAGE_KEY, String(next)); } catch (_) {}
+                                }
+                                setScreen('menu');
+                            }}
+                            onLevelComplete={(levelIdx) => {
+                                const next = Math.max(unlockedLevel, levelIdx + 2);
+                                setUnlockedLevel(next);
+                                try { localStorage.setItem(STORAGE_KEY, String(next)); } catch (_) {}
+                            }}
+                            onNextLevel={(levelIdx) => setCurrentLevelIndex(levelIdx + 1)}
+                            walletAddress={walletAddress}
+                            skrName={skrName}
+                        />
+                    )}
+                    {screen === 'levels' && (
+                        <>
+                            <div className="level-world">
+                                <div className="level-world__bg" aria-hidden="true" />
+                                <div className="level-world__path" aria-hidden="true">
+                                    <svg viewBox="0 0 100 320" preserveAspectRatio="none">
+                                        <path d="M 22 8 L 78 24 L 22 40 L 78 56 L 22 72 L 78 88 L 22 104 L 78 120 L 22 136 L 78 152 L 22 168 L 78 184 L 22 200 L 78 216 L 22 232 L 78 248 L 22 264 L 78 280 L 22 296 L 78 312" />
+                                    </svg>
+                                </div>
+                                <div className="level-world__nodes">
+                                    {LEVELS.map((lev, i) => {
+                                        const levelNum = i + 1;
+                                        const unlocked = levelNum <= unlockedLevel;
+                                        const completed = levelNum < unlockedLevel;
+                                        return (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                className={'level-node' + (!unlocked ? ' level-node--locked' : completed ? ' level-node--completed' : '')}
+                                                style={{ top: 40 + i * 156 }}
+                                                onClick={() => unlocked && (setCurrentLevelIndex(i), setScreen('game'))}
+                                            >
+                                                <span className="level-node__num">{levelNum}</span>
+                                                <span className="level-node__pts">{lev.targetScore}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            <button className="menu-btn-primary level-world__back" style={btnPrimary} onClick={() => setScreen('menu')}>Back</button>
+                        </>
+                    )}
+                    {screen === 'leaderboard' && (
+                        <div style={{ ...menuStyle, alignItems: 'stretch', maxWidth: 420 }}>
+                            <h2 style={{ marginBottom: 24, fontWeight: 700, fontSize: '1.5rem', letterSpacing: '-0.02em' }}>Leaderboard</h2>
+                            <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 24, boxShadow: 'var(--shadow-strong)' }}>
+                                <div style={{ display: 'flex', padding: '16px 22px', background: 'rgba(0,0,0,0.25)', borderBottom: '1px solid var(--color-border)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--color-text-muted)' }}>
+                                    <span style={{ flex: 1 }}>Rank</span>
+                                    <span style={{ flex: 2 }}>Player</span>
+                                    <span style={{ width: 64, textAlign: 'right' }}>Score</span>
+                                </div>
+                                {leaderboard.slice(0, 20).map((entry, i) => (
+                                    <div key={entry.wallet_address + i} style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: i < 19 ? '1px solid var(--color-border)' : 'none', fontSize: '0.95rem' }}>
+                                        <span style={{ flex: 1, fontWeight: 700, color: 'var(--color-text-muted)' }}>#{i + 1}</span>
+                                        <span style={{ flex: 2, fontWeight: 500, color: 'var(--color-text)' }}>{entry.skr_name || entry.wallet_address?.slice(0, 8) + '…'}</span>
+                                        <span style={{ width: 64, textAlign: 'right', fontWeight: 700, color: 'var(--color-accent)' }}>{entry.best_score}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <button style={{ ...btnSecondary, marginTop: 0 }} onClick={() => setScreen('menu')}>Back</button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function hideLoadingAndRender() {
+            const loading = document.getElementById('cc-loading');
+            if (loading) loading.style.display = 'none';
+            const root = document.getElementById('root');
+            if (!root) return;
+            try {
+                if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined' && ReactDOM.createRoot) {
+                    ReactDOM.createRoot(root).render(<App />);
+                } else {
+                    root.innerHTML = '<p style="color:#fff;padding:20px;text-align:center;">Failed to load. Check console.</p>';
+                }
+            } catch (e) {
+                root.innerHTML = '<p style="color:#ff6b6b;padding:20px;text-align:center;">Error: ' + (e.message || String(e)) + '</p>';
+                console.error(e);
+            }
+        }
+
+        function init() {
+            const bar = document.getElementById('cc-loading-bar');
+            let w = 0;
+            const t = setInterval(() => {
+                w += 8;
+                if (bar) bar.style.width = Math.min(w, 100) + '%';
+                if (w >= 100) {
+                    clearInterval(t);
+                    hideLoadingAndRender();
+                }
+            }, 30);
+            // Fallback: if still loading after 2.5s, show app anyway
+            setTimeout(function() {
+                const loading = document.getElementById('cc-loading');
+                if (loading && loading.style.display !== 'none') {
+                    if (bar) bar.style.width = '100%';
+                    hideLoadingAndRender();
+                }
+            }, 2500);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
