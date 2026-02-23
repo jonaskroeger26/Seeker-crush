@@ -70,22 +70,29 @@
 
         .game-bg {
             position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
-            background: radial-gradient(ellipse 140% 100% at 50% -20%, rgba(100, 60, 140, 0.35) 0%, transparent 50%),
-                        radial-gradient(ellipse 90% 70% at 85% 100%, rgba(255, 100, 150, 0.1) 0%, transparent 50%),
-                        radial-gradient(ellipse 80% 80% at 15% 100%, rgba(90, 70, 160, 0.08) 0%, transparent 50%),
-                        linear-gradient(180deg, #1e1a2a 0%, #1a1625 35%, #16121f 100%);
+            background: radial-gradient(ellipse 120% 90% at 50% -10%, rgba(255, 140, 180, 0.2) 0%, transparent 45%),
+                        radial-gradient(ellipse 100% 80% at 20% 110%, rgba(180, 100, 255, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse 80% 100% at 80% 100%, rgba(255, 180, 120, 0.12) 0%, transparent 50%),
+                        radial-gradient(ellipse 90% 70% at 50% 50%, rgba(120, 80, 200, 0.08) 0%, transparent 60%),
+                        linear-gradient(180deg, #241e32 0%, #1c1828 40%, #16121f 100%);
         }
         .game-bg::before {
             content: '';
             position: absolute; inset: 0;
-            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
-            background-size: 28px 28px;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+            background-size: 24px 24px;
             pointer-events: none;
+            animation: bg-dot-drift 20s ease-in-out infinite;
+        }
+        @keyframes bg-dot-drift {
+            0%, 100% { opacity: 1; transform: translate(0, 0); }
+            50% { opacity: 0.85; transform: translate(2px, 2px); }
         }
         .game-bg::after {
             content: '';
             position: absolute; inset: 0;
-            background: radial-gradient(ellipse 100% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.12) 100%);
+            background: radial-gradient(ellipse 100% 80% at 50% 55%, transparent 35%, rgba(0,0,0,0.08) 100%),
+                        radial-gradient(ellipse 85% 65% at 50% 42%, transparent 55%, rgba(0,0,0,0.1) 100%);
             pointer-events: none;
         }
         @keyframes board-in {
@@ -94,36 +101,37 @@
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
         .board-outer {
-            padding: 24px;
-            background: linear-gradient(165deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 30%, rgba(50,42,72,0.4) 60%, rgba(32,28,48,0.95) 100%);
+            padding: 28px;
+            background: linear-gradient(165deg, rgba(255,255,255,0.12) 0%, rgba(255,235,245,0.05) 22%, rgba(55,45,85,0.55) 55%, rgba(32,26,52,0.98) 100%);
             border-radius: 28px;
-            border: 1px solid rgba(255,255,255,0.14);
-            box-shadow: 0 0 0 1px rgba(0,0,0,0.15) inset, 0 2px 0 rgba(255,255,255,0.1), 0 24px 64px rgba(0,0,0,0.22), 0 0 48px rgba(80,50,120,0.12);
-            animation: board-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.25) inset, 0 2px 0 rgba(255,255,255,0.14), 0 24px 56px rgba(0,0,0,0.35), 0 0 48px rgba(255,100,160,0.06);
+            animation: board-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
         .board-inner {
             position: relative;
             padding: 16px;
-            background: linear-gradient(180deg, rgba(48,42,68,0.95) 0%, rgba(32,28,48,0.98) 100%);
+            background: linear-gradient(180deg, rgba(52,44,72,0.98) 0%, rgba(34,28,52,0.99) 100%);
             border-radius: 18px;
             border: 1px solid rgba(255,255,255,0.06);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3) inset, 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(255,255,255,0.03) inset;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.4) inset, 0 1px 0 rgba(255,255,255,0.06);
         }
         .board-inner::before {
             content: '';
             position: absolute; inset: 16px;
             border-radius: 12px;
-            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.02) 100%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.15) inset;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 45%, rgba(0,0,0,0.04) 100%);
             pointer-events: none;
         }
 
-        /* Candy slot — soft well, crisp clip for animations */
+        /* Candy slot — clear well so candies read on top */
         .candy-cell {
             border: none;
             border-radius: 12px;
             cursor: pointer;
             padding: 0;
-            transition: box-shadow 0.2s ease;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
             min-width: 0; min-height: 0;
             position: relative;
             overflow: hidden;
@@ -133,27 +141,30 @@
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
-            background: linear-gradient(180deg, rgba(58,50,78,0.98) 0%, rgba(42,36,62,0.98) 100%);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25) inset, 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.05) inset;
-            border: 1px solid rgba(255,255,255,0.05);
+            background: linear-gradient(180deg, rgba(48,42,68,0.98) 0%, rgba(38,32,55,0.98) 100%);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.4) inset, 0 1px 0 rgba(255,255,255,0.08);
+            border: 1px solid rgba(0,0,0,0.2);
             transform: translateZ(0);
         }
         .candy-cell::before {
             content: '';
             position: absolute; inset: 0;
             border-radius: 12px;
-            background: linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 45%, rgba(70,60,100,0.12) 100%);
+            background: linear-gradient(165deg, rgba(255,255,255,0.07) 0%, transparent 35%, rgba(80,60,120,0.08) 100%);
             pointer-events: none;
         }
         .candy-cell::after {
             content: '';
             position: absolute; inset: 2px;
             border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.04);
-            box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.2) inset;
             pointer-events: none;
         }
-        .candy-cell:active { transform: scale(0.97); }
+        .candy-cell.selected {
+            box-shadow: 0 0 0 2px rgba(255,210,130,0.7), 0 0 24px rgba(255,180,100,0.3), 0 6px 14px rgba(0,0,0,0.4) inset;
+            z-index: 1;
+        }
+        .candy-cell:active { transform: scale(0.96); }
         .candy-cell.swap-anim { animation: swap-slide 0.12s ease-out forwards; z-index: 2; }
         @keyframes swap-slide {
             from { transform: translate(0, 0); }
@@ -211,21 +222,21 @@
             pointer-events: none;
             transform: translateZ(0);
         }
-        /* Single drop-shadow per candy for smoother paint */
+        /* Single drop-shadow per candy so they sit clearly on the well */
         .candy-cell .candy-svg {
             width: 180%; height: 180%;
-            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 4px 10px rgba(0,0,0,0.25));
         }
         .candy-cell .candy-img {
             object-fit: contain;
             display: block;
             pointer-events: none;
         }
-        .candy-cell[data-type="0"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
-        .candy-cell[data-type="1"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
-        .candy-cell[data-type="2"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
-        .candy-cell[data-type="3"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
-        .candy-cell[data-type="4"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="0"] .candy-svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 4px 10px rgba(0,0,0,0.25)); }
+        .candy-cell[data-type="1"] .candy-svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 4px 10px rgba(0,0,0,0.25)); }
+        .candy-cell[data-type="2"] .candy-svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 4px 10px rgba(0,0,0,0.25)); }
+        .candy-cell[data-type="3"] .candy-svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 4px 10px rgba(0,0,0,0.25)); }
+        .candy-cell[data-type="4"] .candy-svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)) drop-shadow(0 4px 10px rgba(0,0,0,0.25)); }
         /* Powerups: use generated images when available; hide CSS overlays */
         .candy-cell.striped-h::after,
         .candy-cell.striped-v::after,
@@ -257,20 +268,20 @@
         }
         .score-pop {
             position: fixed; z-index: 200;
-            font-family: var(--font-ui); font-weight: 800; font-size: 2rem;
+            font-family: var(--font-ui); font-weight: 800; font-size: 2.1rem;
             color: #fff;
-            text-shadow: 0 0 32px rgba(255,120,160,0.8), 0 0 16px rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.35);
+            text-shadow: 0 0 2px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.5), 0 0 24px rgba(255,160,100,0.5);
+            -webkit-text-stroke: 0.5px rgba(0,0,0,0.25);
             pointer-events: none;
             left: 50%; top: 42%; transform: translate(-50%, -50%);
-            animation: scorePop 0.7s cubic-bezier(0.22, 1.1, 0.36, 1) forwards;
+            animation: scorePop 0.75s cubic-bezier(0.22, 1.2, 0.36, 1) forwards;
         }
         @keyframes scorePop {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
-            18% { opacity: 1; transform: translate(-50%, -50%) scale(1.35); }
-            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-            100% { opacity: 0; transform: translate(-50%, -90px) scale(1); }
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); filter: brightness(0.5); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.4); filter: brightness(1.3); }
+            35% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); filter: brightness(1); }
+            100% { opacity: 0; transform: translate(-50%, -100px) scale(1); filter: brightness(1); }
         }
-
         /* Start menu: falling candy images */
         .menu-fall-wrap { position: relative; overflow: hidden; min-height: 100vh; width: 100%; background: linear-gradient(180deg, #1e1a2a 0%, #1a1625 100%); }
         .menu-fall-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
@@ -527,10 +538,11 @@
             { bg: 'linear-gradient(165deg, #fffde7 0%, #fff59d 22%, #ffeb3b 55%, #ffc107 85%, #ff8f00 100%)', shadow: '0 8px 24px rgba(255,193,7,0.4), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.55)' },
             { bg: 'linear-gradient(165deg, #e8f5e9 0%, #a5d6a7 22%, #66bb6a 55%, #43a047 85%, #2e7d32 100%)', shadow: '0 8px 24px rgba(67,160,71,0.4), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.4)' },
             { bg: 'linear-gradient(165deg, #e3f2fd 0%, #90caf9 22%, #42a5f5 55%, #1e88e5 85%, #1565c0 100%)', shadow: '0 8px 24px rgba(30,136,229,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.45)' },
-            { bg: 'linear-gradient(165deg, #f3e5f5 0%, #ce93d8 22%, #ba68c8 55%, #ab47bc 85%, #7b1fa2 100%)', shadow: '0 8px 24px rgba(171,71,188,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4)' }
+            { bg: 'linear-gradient(165deg, #f3e5f5 0%, #ce93d8 22%, #ba68c8 55%, #ab47bc 85%, #7b1fa2 100%)', shadow: '0 8px 24px rgba(171,71,188,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4)' },
+            { bg: 'linear-gradient(165deg, #e0f7fa 0%, #80deea 22%, #26c6da 55%, #00acc1 85%, #00838f 100%)', shadow: '0 8px 24px rgba(0,172,193,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.45)' }
         ];
-        const COLS = 8;
-        const ROWS = 8;
+        const DEFAULT_ROWS = 8;
+        const DEFAULT_COLS = 8;
         const POINTS_PER_CANDY = 3;
         const BONUS_4 = 5;
         const BONUS_5 = 15;
@@ -549,26 +561,99 @@
         }
 
         const LEVELS = [
-            { moves: 15, targetScore: 420, numCandyTypes: 5 },
-            { moves: 15, targetScore: 460, numCandyTypes: 5 },
-            { moves: 14, targetScore: 640, numCandyTypes: 5 },
-            { moves: 13, targetScore: 780, numCandyTypes: 5 },
-            { moves: 13, targetScore: 940, numCandyTypes: 5 },
-            { moves: 12, targetScore: 1120, numCandyTypes: 5 },
-            { moves: 12, targetScore: 1320, numCandyTypes: 5 },
-            { moves: 12, targetScore: 1550, numCandyTypes: 5 },
-            { moves: 11, targetScore: 1820, numCandyTypes: 5 },
-            { moves: 11, targetScore: 2120, numCandyTypes: 5 },
-            { moves: 11, targetScore: 2450, numCandyTypes: 5 },
-            { moves: 10, targetScore: 2820, numCandyTypes: 5 },
-            { moves: 10, targetScore: 3240, numCandyTypes: 5 },
-            { moves: 10, targetScore: 3700, numCandyTypes: 5 },
-            { moves: 10, targetScore: 4200, numCandyTypes: 5 },
-            { moves: 9, targetScore: 4750, numCandyTypes: 5 },
-            { moves: 9, targetScore: 5350, numCandyTypes: 5 },
-            { moves: 9, targetScore: 6000, numCandyTypes: 5 },
-            { moves: 9, targetScore: 6700, numCandyTypes: 5 },
-            { moves: 8, targetScore: 7450, numCandyTypes: 5 }
+            { moves: 18, targetScore: 350, numCandyTypes: 5 },
+            { moves: 18, targetScore: 420, numCandyTypes: 5 },
+            { moves: 17, targetScore: 520, numCandyTypes: 5 },
+            { moves: 16, targetScore: 640, numCandyTypes: 5 },
+            { moves: 16, targetScore: 780, numCandyTypes: 5 },
+            { moves: 15, targetScore: 920, numCandyTypes: 5 },
+            { moves: 15, targetScore: 1080, numCandyTypes: 5 },
+            { moves: 14, targetScore: 1280, numCandyTypes: 5 },
+            { moves: 14, targetScore: 1500, numCandyTypes: 5 },
+            { moves: 13, targetScore: 1750, numCandyTypes: 5 },
+            { moves: 13, targetScore: 2050, numCandyTypes: 5 },
+            { moves: 12, targetScore: 2400, numCandyTypes: 5 },
+            { moves: 12, targetScore: 2800, numCandyTypes: 5 },
+            { moves: 12, targetScore: 3250, numCandyTypes: 5 },
+            { moves: 11, targetScore: 3750, numCandyTypes: 5 },
+            { moves: 11, targetScore: 4300, numCandyTypes: 5 },
+            { moves: 11, targetScore: 4900, numCandyTypes: 5 },
+            { moves: 10, targetScore: 5550, numCandyTypes: 5 },
+            { moves: 10, targetScore: 6250, numCandyTypes: 5 },
+            { moves: 10, targetScore: 7000, numCandyTypes: 5 },
+            { moves: 18, targetScore: 3200, numCandyTypes: 5 },
+            { moves: 17, targetScore: 3600, numCandyTypes: 5 },
+            { moves: 17, targetScore: 4050, numCandyTypes: 5 },
+            { moves: 16, targetScore: 4550, numCandyTypes: 5 },
+            { moves: 16, targetScore: 5100, numCandyTypes: 5 },
+            { moves: 15, targetScore: 5700, numCandyTypes: 5 },
+            { moves: 15, targetScore: 6350, numCandyTypes: 5 },
+            { moves: 14, targetScore: 7050, numCandyTypes: 5 },
+            { moves: 14, targetScore: 7800, numCandyTypes: 5 },
+            { moves: 13, targetScore: 8600, numCandyTypes: 5 },
+            { moves: 13, targetScore: 9500, numCandyTypes: 5 },
+            { moves: 12, targetScore: 10500, numCandyTypes: 5 },
+            { moves: 12, targetScore: 11600, numCandyTypes: 5 },
+            { moves: 12, targetScore: 12800, numCandyTypes: 5 },
+            { moves: 11, targetScore: 14100, numCandyTypes: 5 },
+            { moves: 11, targetScore: 15500, numCandyTypes: 5 },
+            { moves: 11, targetScore: 17000, numCandyTypes: 5 },
+            { moves: 10, targetScore: 18600, numCandyTypes: 5 },
+            { moves: 10, targetScore: 20400, numCandyTypes: 5 },
+            { moves: 10, targetScore: 22300, numCandyTypes: 5 },
+            { moves: 20, targetScore: 4500, numCandyTypes: 6 },
+            { moves: 19, targetScore: 5200, numCandyTypes: 6 },
+            { moves: 19, targetScore: 6000, numCandyTypes: 6 },
+            { moves: 18, targetScore: 6900, numCandyTypes: 6 },
+            { moves: 18, targetScore: 7900, numCandyTypes: 6 },
+            { moves: 17, targetScore: 9000, numCandyTypes: 6 },
+            { moves: 17, targetScore: 10200, numCandyTypes: 6 },
+            { moves: 16, targetScore: 11500, numCandyTypes: 6 },
+            { moves: 16, targetScore: 12900, numCandyTypes: 6 },
+            { moves: 15, targetScore: 14400, numCandyTypes: 6 },
+            { moves: 15, targetScore: 16000, numCandyTypes: 6 },
+            { moves: 14, targetScore: 17700, numCandyTypes: 6 },
+            { moves: 14, targetScore: 19500, numCandyTypes: 6 },
+            { moves: 14, targetScore: 21400, numCandyTypes: 6 },
+            { moves: 13, targetScore: 23400, numCandyTypes: 6 },
+            { moves: 13, targetScore: 25500, numCandyTypes: 6 },
+            { moves: 13, targetScore: 27700, numCandyTypes: 6 },
+            { moves: 12, targetScore: 30000, numCandyTypes: 6 },
+            { moves: 12, targetScore: 32400, numCandyTypes: 6 },
+            { moves: 12, targetScore: 34900, numCandyTypes: 6 },
+            { moves: 11, targetScore: 37500, numCandyTypes: 6 },
+            { moves: 22, targetScore: 8000, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 21, targetScore: 9200, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 21, targetScore: 10500, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 20, targetScore: 11900, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 20, targetScore: 13400, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 19, targetScore: 15000, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 19, targetScore: 16700, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 18, targetScore: 18500, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 18, targetScore: 20400, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 17, targetScore: 22400, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 17, targetScore: 24500, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 16, targetScore: 26700, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 16, targetScore: 29000, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 16, targetScore: 31400, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 15, targetScore: 33900, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 15, targetScore: 36500, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 15, targetScore: 39200, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 14, targetScore: 42000, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 14, targetScore: 44900, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 14, targetScore: 47900, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 13, targetScore: 51000, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 13, targetScore: 54200, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 13, targetScore: 57500, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 12, targetScore: 60900, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 12, targetScore: 64400, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 12, targetScore: 68000, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 11, targetScore: 71700, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 11, targetScore: 75500, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 11, targetScore: 79400, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 10, targetScore: 83400, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 10, targetScore: 87500, numCandyTypes: 6, rows: 9, cols: 9 },
+            { moves: 10, targetScore: 91700, numCandyTypes: 6, rows: 9, cols: 9 }
         ];
 
         function getRandomCandy(maxTypes) {
@@ -576,7 +661,7 @@
             return Math.floor(Math.random() * n);
         }
 
-        const CANDY_IMAGE_SRCS = ['/candy-0.png', '/candy-1.png', '/candy-2.png', '/candy-3.png', '/candy-4.png'];
+        const CANDY_IMAGE_SRCS = ['/candy-0.png', '/candy-1.png', '/candy-2.png', '/candy-3.png', '/candy-4.png', '/candy-4.png'];
         const POWERUP_IMAGE_SRCS = {
             'striped-h': '/powerup-striped-h.png',
             'striped-v': '/powerup-striped-v.png',
@@ -649,39 +734,62 @@
             return null;
         }
 
-        function createGrid(numCandyTypes) {
+        function createGrid(numCandyTypes, rows, cols) {
+            const R = rows ?? DEFAULT_ROWS;
+            const C = cols ?? DEFAULT_COLS;
             const maxT = numCandyTypes != null ? Math.min(numCandyTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
-            const grid = [];
-            for (let r = 0; r < ROWS; r++) {
-                grid[r] = [];
-                for (let c = 0; c < COLS; c++) {
-                    let candy = getRandomCandy(maxT);
-                    while ((c >= 2 && grid[r][c-1] === candy && grid[r][c-2] === candy) ||
-                           (r >= 2 && grid[r-1]?.[c] === candy && grid[r-2]?.[c] === candy)) {
-                        candy = getRandomCandy(maxT);
+            let grid;
+            let attempts = 0;
+            do {
+                grid = [];
+                for (let r = 0; r < R; r++) {
+                    grid[r] = [];
+                    for (let c = 0; c < C; c++) {
+                        let candy = getRandomCandy(maxT);
+                        while ((c >= 2 && grid[r][c-1] === candy && grid[r][c-2] === candy) ||
+                               (r >= 2 && grid[r-1]?.[c] === candy && grid[r-2]?.[c] === candy)) {
+                            candy = getRandomCandy(maxT);
+                        }
+                        grid[r][c] = candy;
                     }
+                }
+                const matches = findMatches(grid, R, C);
+                if (matches.length === 0) break;
+                for (const [r, c] of matches) {
+                    const avoid = new Set();
+                    if (c >= 2 && grid[r][c-1] === grid[r][c-2]) avoid.add(grid[r][c-1]);
+                    if (c + 2 < C && grid[r][c+1] === grid[r][c+2]) avoid.add(grid[r][c+1]);
+                    if (r >= 2 && grid[r-1][c] === grid[r-2][c]) avoid.add(grid[r-1][c]);
+                    if (r + 2 < R && grid[r+1]?.[c] === grid[r+2]?.[c]) avoid.add(grid[r+1][c]);
+                    let candy = getRandomCandy(maxT);
+                    while (avoid.has(candy)) candy = getRandomCandy(maxT);
                     grid[r][c] = candy;
                 }
-            }
+                attempts++;
+            } while (attempts < 50);
             return grid;
         }
 
-        function createPowerUpGrid() {
-            return Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
+        function createPowerUpGrid(rows, cols) {
+            const R = rows ?? DEFAULT_ROWS;
+            const C = cols ?? DEFAULT_COLS;
+            return Array(R).fill(null).map(() => Array(C).fill(null));
         }
 
-        function findMatches(grid) {
+        function findMatches(grid, rows, cols) {
+            const R = rows ?? DEFAULT_ROWS;
+            const C = cols ?? DEFAULT_COLS;
             const set = new Set();
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c <= COLS - 3; c++) {
+            for (let r = 0; r < R; r++) {
+                for (let c = 0; c <= C - 3; c++) {
                     const v = grid[r][c];
                     if (v === grid[r][c+1] && v === grid[r][c+2]) {
                         set.add(`${r},${c}`); set.add(`${r},${c+1}`); set.add(`${r},${c+2}`);
                     }
                 }
             }
-            for (let c = 0; c < COLS; c++) {
-                for (let r = 0; r <= ROWS - 3; r++) {
+            for (let c = 0; c < C; c++) {
+                for (let r = 0; r <= R - 3; r++) {
                     const v = grid[r][c];
                     if (v === grid[r+1]?.[c] && v === grid[r+2]?.[c]) {
                         set.add(`${r},${c}`); set.add(`${r+1},${c}`); set.add(`${r+2},${c}`);
@@ -691,24 +799,26 @@
             return Array.from(set).map(s => s.split(',').map(Number));
         }
 
-        function findRuns(grid) {
+        function findRuns(grid, rows, cols) {
+            const R = rows ?? DEFAULT_ROWS;
+            const C = cols ?? DEFAULT_COLS;
             const runs = [];
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c <= COLS - 3; c++) {
+            for (let r = 0; r < R; r++) {
+                for (let c = 0; c <= C - 3; c++) {
                     const v = grid[r][c];
                     let len = 1;
-                    while (c + len < COLS && grid[r][c + len] === v) len++;
+                    while (c + len < C && grid[r][c + len] === v) len++;
                     if (len >= 3) {
                         runs.push({ coords: Array.from({ length: len }, (_, i) => [r, c + i]), dir: 'h', length: len });
                         c += len - 1;
                     }
                 }
             }
-            for (let c = 0; c < COLS; c++) {
-                for (let r = 0; r <= ROWS - 3; r++) {
+            for (let c = 0; c < C; c++) {
+                for (let r = 0; r <= R - 3; r++) {
                     const v = grid[r][c];
                     let len = 1;
-                    while (r + len < ROWS && grid[r + len][c] === v) len++;
+                    while (r + len < R && grid[r + len][c] === v) len++;
                     if (len >= 3) {
                         runs.push({ coords: Array.from({ length: len }, (_, i) => [r + i, c]), dir: 'v', length: len });
                         r += len - 1;
@@ -718,9 +828,10 @@
             return runs;
         }
 
-        function getCellsToRemoveAndPowerUps(grid, powerUpGrid, matchCoords) {
-            const toRemove = new Set(matchCoords.map(([r,c]) => `${r},${c}`));
-            const runs = findRuns(grid);
+        function getCellsToRemoveAndPowerUps(grid, powerUpGrid, matchCoords, rows, cols) {
+            const runs = findRuns(grid, rows, cols);
+            const toRemove = new Set();
+            runs.forEach(run => run.coords.forEach(([r, c]) => toRemove.add(`${r},${c}`)));
             const horRuns = runs.filter(r => r.dir === 'h');
             const verRuns = runs.filter(r => r.dir === 'v');
             const wrappedCells = new Set();
@@ -758,72 +869,81 @@
             return { toRemove: Array.from(toRemove).map(s => s.split(',').map(Number)) };
         }
 
-        function getPowerUpEffectCells(grid, powerUpGrid, pr, pc, otherR, otherC) {
+        function getPowerUpEffectCells(grid, powerUpGrid, pr, pc, otherR, otherC, rows, cols) {
+            const R = rows ?? DEFAULT_ROWS;
+            const C = cols ?? DEFAULT_COLS;
             const pu = powerUpGrid[pr]?.[pc];
             if (!pu) return [];
             const out = [[pr, pc]];
             if (pu === 'striped-h') {
-                for (let col = 0; col < COLS; col++) out.push([pr, col]);
+                for (let col = 0; col < C; col++) out.push([pr, col]);
             } else if (pu === 'striped-v') {
-                for (let row = 0; row < ROWS; row++) out.push([row, pc]);
+                for (let row = 0; row < R; row++) out.push([row, pc]);
             } else if (pu === 'wrapped') {
                 for (let dr = -1; dr <= 1; dr++)
                     for (let dc = -1; dc <= 1; dc++) {
                         const nr = pr + dr, nc = pc + dc;
-                        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) out.push([nr, nc]);
+                        if (nr >= 0 && nr < R && nc >= 0 && nc < C) out.push([nr, nc]);
                     }
             } else if (pu === 'color-bomb') {
                 const color = grid[otherR][otherC];
-                for (let rr = 0; rr < ROWS; rr++)
-                    for (let cc = 0; cc < COLS; cc++)
+                for (let rr = 0; rr < R; rr++)
+                    for (let cc = 0; cc < C; cc++)
                         if (grid[rr][cc] === color) out.push([rr, cc]);
             }
             return out;
         }
 
-        function getRandomBonusEffectCells(grid, powerUpGrid, numCandyTypes) {
+        function getRandomBonusEffectCells(grid, powerUpGrid, numCandyTypes, rows, cols) {
+            const R = rows ?? DEFAULT_ROWS;
+            const C = cols ?? DEFAULT_COLS;
             const types = ['striped-h', 'striped-v', 'wrapped', 'color-bomb'];
             const t = types[Math.floor(Math.random() * types.length)];
             const out = [];
             if (t === 'striped-h') {
-                const r = Math.floor(Math.random() * ROWS);
-                for (let c = 0; c < COLS; c++) out.push([r, c]);
+                const r = Math.floor(Math.random() * R);
+                for (let c = 0; c < C; c++) out.push([r, c]);
             } else if (t === 'striped-v') {
-                const c = Math.floor(Math.random() * COLS);
-                for (let r = 0; r < ROWS; r++) out.push([r, c]);
+                const c = Math.floor(Math.random() * C);
+                for (let r = 0; r < R; r++) out.push([r, c]);
             } else if (t === 'wrapped') {
-                const cr = 1 + Math.floor(Math.random() * (ROWS - 2));
-                const cc = 1 + Math.floor(Math.random() * (COLS - 2));
+                const cr = R <= 2 ? 0 : 1 + Math.floor(Math.random() * (R - 2));
+                const cc = C <= 2 ? 0 : 1 + Math.floor(Math.random() * (C - 2));
                 for (let dr = -1; dr <= 1; dr++)
-                    for (let dc = -1; dc <= 1; dc++) out.push([cr + dr, cc + dc]);
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nr = cr + dr, nc = cc + dc;
+                        if (nr >= 0 && nr < R && nc >= 0 && nc < C) out.push([nr, nc]);
+                    }
             } else {
-                const maxT = numCandyTypes != null ? Math.min(numCandyTypes, 5) : 5;
+                const maxT = numCandyTypes != null ? Math.min(numCandyTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
                 const color = Math.floor(Math.random() * maxT);
-                for (let rr = 0; rr < ROWS; rr++)
-                    for (let cc = 0; cc < COLS; cc++)
+                for (let rr = 0; rr < R; rr++)
+                    for (let cc = 0; cc < C; cc++)
                         if (grid[rr][cc] === color) out.push([rr, cc]);
             }
             return out;
         }
 
-        function removeAndDrop(grid, powerUpGrid, toRemove, numCandyTypes) {
+        function removeAndDrop(grid, powerUpGrid, toRemove, numCandyTypes, rows, cols) {
+            const R = rows ?? DEFAULT_ROWS;
+            const C = cols ?? DEFAULT_COLS;
             const maxT = numCandyTypes != null ? Math.min(numCandyTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
             const colsToDrop = new Set(toRemove.map(([r,c]) => c));
             for (const c of colsToDrop) {
                 const colCells = [];
                 const colPowers = [];
-                for (let r = 0; r < ROWS; r++) {
+                for (let r = 0; r < R; r++) {
                     if (!toRemove.some(([mr,mc]) => mr === r && mc === c)) {
                         colCells.push(grid[r][c]);
                         colPowers.push(powerUpGrid[r][c]);
                     }
                 }
-                const removed = ROWS - colCells.length;
+                const removed = R - colCells.length;
                 for (let i = 0; i < removed; i++) {
                     colCells.unshift(getRandomCandy(maxT));
                     colPowers.unshift(null);
                 }
-                for (let r = 0; r < ROWS; r++) {
+                for (let r = 0; r < R; r++) {
                     grid[r][c] = colCells[r];
                     powerUpGrid[r][c] = colPowers[r];
                 }
@@ -845,8 +965,10 @@
 
         function Match3Game({ levelIndex, hearts = 5, onGameOver, onLevelComplete, onNextLevel, walletAddress, skrName }) {
             const level = LEVELS[levelIndex] || LEVELS[0];
-            const [grid, setGrid] = useState(() => createGrid(level.numCandyTypes));
-            const [powerUpGrid, setPowerUpGrid] = useState(() => createPowerUpGrid());
+            const rows = level.rows ?? DEFAULT_ROWS;
+            const cols = level.cols ?? DEFAULT_COLS;
+            const [grid, setGrid] = useState(() => createGrid(level.numCandyTypes, rows, cols));
+            const [powerUpGrid, setPowerUpGrid] = useState(() => createPowerUpGrid(rows, cols));
             const [score, setScore] = useState(0);
             const [movesLeft, setMovesLeft] = useState(level.moves);
             const [dragStart, setDragStart] = useState(null);
@@ -867,24 +989,23 @@
             const [candyUrls, setCandyUrls] = useState(() => []);
             const [powerupUrls, setPowerupUrls] = useState(() => ({}));
             const [isPaused, setIsPaused] = useState(false);
-
             const addScorePopup = (value) => {
                 const id = ++popupIdRef.current;
                 setScorePopups(prev => [...prev, { id, value }]);
                 setTimeout(() => setScorePopups(prev => prev.filter(p => p.id !== id)), 780);
             };
 
-            const processMatchCycle = useRef((g, pug, cascadeLevel, onPoints) => {
-                const matchCoords = findMatches(g);
+            const processMatchCycle = useRef((g, pug, cascadeLevel, onPoints, r, c) => {
+                const matchCoords = findMatches(g, r, c);
                 if (matchCoords.length === 0) return false;
-                const runs = findRuns(g);
-                const { toRemove } = getCellsToRemoveAndPowerUps(g, pug, matchCoords);
+                const runs = findRuns(g, r, c);
+                const { toRemove } = getCellsToRemoveAndPowerUps(g, pug, matchCoords, r, c);
                 let points = toRemove.length * POINTS_PER_CANDY;
-                const maxRun = runs.length ? Math.max(...runs.map(r => r.length)) : 3;
+                const maxRun = runs.length ? Math.max(...runs.map(run => run.length)) : 3;
                 if (maxRun >= 5) points += BONUS_5;
                 else if (maxRun >= 4) points += BONUS_4;
                 points += cascadeLevel * BONUS_CASCADE;
-                removeAndDrop(g, pug, toRemove, level.numCandyTypes);
+                removeAndDrop(g, pug, toRemove, level.numCandyTypes, r, c);
                 onPoints(points);
                 return true;
             });
@@ -895,7 +1016,7 @@
                 const g = grid.map(row => [...row]);
                 const pug = powerUpGrid.map(row => [...row]);
                 swap(g, pug, r1, c1, r2, c2);
-                const matches = findMatches(g);
+                const matches = findMatches(g, rows, cols);
                 if (matches.length === 0 && !hasPowerup) {
                     setDragStart(null);
                     setDragCurrent(null);
@@ -916,14 +1037,14 @@
                 setMovesLeft(m => m - 1);
                 // Powerup effects only for powerups that were already on the board (Candy Crush style:
                 // a powerup created by this match must not trigger until the player swaps it later).
-                const effect1 = getPowerUpEffectCells(g, pug, r1, c1, r2, c2);
-                const effect2 = getPowerUpEffectCells(g, pug, r2, c2, r1, c1);
-                const matchResult = getCellsToRemoveAndPowerUps(g, pug, matches);
+                const effect1 = getPowerUpEffectCells(g, pug, r1, c1, r2, c2, rows, cols);
+                const effect2 = getPowerUpEffectCells(g, pug, r2, c2, r1, c1, rows, cols);
+                const matchResult = getCellsToRemoveAndPowerUps(g, pug, matches, rows, cols);
                 const toRemoveSet = new Set(matchResult.toRemove.map(([r,c]) => `${r},${c}`));
                 effect1.forEach(([r,c]) => toRemoveSet.add(`${r},${c}`));
                 effect2.forEach(([r,c]) => toRemoveSet.add(`${r},${c}`));
                 const toRemove = Array.from(toRemoveSet).map(s => s.split(',').map(Number));
-                const runs = findRuns(g);
+                const runs = findRuns(g, rows, cols);
                 let points = toRemove.length * POINTS_PER_CANDY;
                 const maxRun = runs.length ? Math.max(...runs.map(r => r.length)) : 3;
                 if (maxRun >= 5) points += BONUS_5;
@@ -936,9 +1057,9 @@
                     setSwapAnim(null);
                     setAnimatingOut(new Set(toRemove.map(([r,c]) => `${r},${c}`)));
                     setTimeout(() => {
-                        removeAndDrop(g, pug, toRemove, level.numCandyTypes);
+                        removeAndDrop(g, pug, toRemove, level.numCandyTypes, rows, cols);
                         const dropSet = new Set();
-                        for (let c = 0; c < COLS; c++) {
+                        for (let c = 0; c < cols; c++) {
                             const removedInCol = toRemove.filter(([rr, cc]) => cc === c).length;
                             for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
                         }
@@ -954,7 +1075,7 @@
                         setTimeout(() => {
                             setAnimatingDrop(new Set());
                             const runCascade = (cascadeLevel) => {
-                            const matchCoords = findMatches(g);
+                            const matchCoords = findMatches(g, rows, cols);
                             if (matchCoords.length === 0) {
                                 setGrid([...g.map(row => [...row])]);
                                 setPowerUpGrid(pug.map(row => [...row]));
@@ -978,7 +1099,7 @@
                                             }
                                             if (onLevelComplete) onLevelComplete(levelIndex);
                                             if (onGameOver) onGameOver(finalScore, levelIndex, true);
-                                        }, 400);
+                                        }, 15000);
                                     } else {
                                         bonusPhaseRef.current = {
                                             grid: g.map(row => [...row]),
@@ -986,6 +1107,8 @@
                                             score: finalScore,
                                             remaining: movesLeft,
                                             numCandyTypes: level.numCandyTypes,
+                                            rows,
+                                            cols,
                                             targetScore: level.targetScore
                                         };
                                         setBonusPhaseRemaining(movesLeft);
@@ -996,35 +1119,32 @@
                                     setGameOver(true);
                                     setLevelResult('lose');
                                     setScore(finalScore);
-                                    setTimeout(() => {
-                                        if (supabase && walletAddress) {
-                                            supabase.from('leaderboards').insert({
-                                                wallet_address: walletAddress,
-                                                skr_name: skrName || null,
-                                                score: finalScore,
-                                                game_mode: 'seeker_crush',
-                                                difficulty: 'classic'
-                                            }).then(() => {});
-                                        }
-                                        if (onGameOver) onGameOver(finalScore, levelIndex, false);
-                                    }, 400);
+                                    if (supabase && walletAddress) {
+                                        supabase.from('leaderboards').insert({
+                                            wallet_address: walletAddress,
+                                            skr_name: skrName || null,
+                                            score: finalScore,
+                                            game_mode: 'seeker_crush',
+                                            difficulty: 'classic'
+                                        }).then(() => {});
+                                    }
                                 }
                                 return;
                             }
-                            const nextResult = getCellsToRemoveAndPowerUps(g, pug, matchCoords);
+                            const nextResult = getCellsToRemoveAndPowerUps(g, pug, matchCoords, rows, cols);
                             const nextToRemove = nextResult.toRemove;
-                            const nextRuns = findRuns(g);
+                            const nextRuns = findRuns(g, rows, cols);
                             let nextPoints = nextToRemove.length * POINTS_PER_CANDY;
-                            const nextMaxRun = nextRuns.length ? Math.max(...nextRuns.map(r => r.length)) : 3;
+                            const nextMaxRun = nextRuns.length ? Math.max(...nextRuns.map(run => run.length)) : 3;
                             if (nextMaxRun >= 5) nextPoints += BONUS_5;
                             else if (nextMaxRun >= 4) nextPoints += BONUS_4;
                             nextPoints += cascadeLevel * BONUS_CASCADE;
                             totalPoints += nextPoints;
                             setAnimatingOut(new Set(nextToRemove.map(([r,c]) => `${r},${c}`)));
                             setTimeout(() => {
-                                removeAndDrop(g, pug, nextToRemove, level.numCandyTypes);
+                                removeAndDrop(g, pug, nextToRemove, level.numCandyTypes, rows, cols);
                                 const dropSet = new Set();
-                                for (let c = 0; c < COLS; c++) {
+                                for (let c = 0; c < cols; c++) {
                                     const removedInCol = nextToRemove.filter(([rr, cc]) => cc === c).length;
                                     for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
                                 }
@@ -1102,39 +1222,39 @@
                         setStars(getStars(ref.score, ref.targetScore));
                         setScore(ref.score);
                         bonusPhaseRef.current = null;
-                        setTimeout(() => {
-                            if (supabase && walletAddress) {
-                                supabase.from('leaderboards').insert({
-                                    wallet_address: walletAddress,
-                                    skr_name: skrName || null,
-                                    score: ref.score,
-                                    game_mode: 'seeker_crush',
-                                    difficulty: 'classic'
-                                }).then(() => {});
-                            }
-                            if (onLevelComplete) onLevelComplete(levelIndex);
-                            if (onGameOver) onGameOver(ref.score, levelIndex, true);
-                        }, 400);
+setTimeout(() => {
+                                if (supabase && walletAddress) {
+                                    supabase.from('leaderboards').insert({
+                                        wallet_address: walletAddress,
+                                        skr_name: skrName || null,
+                                        score: ref.score,
+                                        game_mode: 'seeker_crush',
+                                        difficulty: 'classic'
+                                    }).then(() => {});
+                                }
+                                if (onLevelComplete) onLevelComplete(levelIndex);
+                                if (onGameOver) onGameOver(ref.score, levelIndex, true);
+                            }, 15000);
                     }
                     return;
                 }
                 const ref = bonusPhaseRef.current;
                 if (!ref || ref.remaining <= 0) return;
-                const toRemove = getRandomBonusEffectCells(ref.grid, ref.powerUpGrid, ref.numCandyTypes);
+                const toRemove = getRandomBonusEffectCells(ref.grid, ref.powerUpGrid, ref.numCandyTypes, ref.rows, ref.cols);
                 if (toRemove.length === 0) {
                     setBonusPhaseRemaining(0);
                     return;
                 }
-                removeAndDrop(ref.grid, ref.powerUpGrid, toRemove, ref.numCandyTypes);
+                removeAndDrop(ref.grid, ref.powerUpGrid, toRemove, ref.numCandyTypes, ref.rows, ref.cols);
                 const points = toRemove.length * POINTS_PER_CANDY;
                 ref.score += points;
                 ref.remaining -= 1;
                 setAnimatingOut(new Set(toRemove.map(([r,c]) => `${r},${c}`)));
                 const dropSet = new Set();
-                for (let c = 0; c < COLS; c++) {
-                    const removedInCol = toRemove.filter(([rr, cc]) => cc === c).length;
-                    for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
-                }
+for (let c = 0; c < ref.cols; c++) {
+                                    const removedInCol = toRemove.filter(([rr, cc]) => cc === c).length;
+                                    for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
+                                }
                 const nextGrid = ref.grid.map(row => [...row]);
                 const nextPug = ref.powerUpGrid.map(row => [...row]);
                 const timer1 = setTimeout(() => {
@@ -1192,7 +1312,7 @@
                     <div className="grid-wrap" style={styles.gridWrap} ref={boardRef}>
                         <div className="board-outer">
                         <div className="board-inner">
-                        <div style={styles.grid}>
+                        <div style={{ ...styles.grid, '--board-cols': cols, gridTemplateColumns: `repeat(${cols}, 1fr)`, width: `min(${Math.round(84*cols/8)}vmin, ${Math.round(320*cols/8)}px)`, height: `min(${Math.round(84*rows/8)}vmin, ${Math.round(320*rows/8)}px)` }}>
                             {grid.map((row, r) => row.map((candy, c) => {
                                 const key = `${r},${c}`;
                                 const isDragStart = dragStart && dragStart.r === r && dragStart.c === c;
@@ -1253,7 +1373,7 @@
                                 {levelResult === 'win' && levelIndex < LEVELS.length - 1 && (
                                     <button className="overlay-btn" style={styles.overlayBtn} onClick={() => { if (onLevelComplete) onLevelComplete(levelIndex); if (onNextLevel) onNextLevel(levelIndex); }}>Next Level</button>
                                 )}
-                                {levelResult === 'lose' && <button className="overlay-btn" style={styles.overlayBtn} onClick={() => { setGameOver(false); setLevelResult(null); setStars(0); setBonusPhaseRemaining(0); bonusPhaseRef.current = null; setGrid(createGrid(level.numCandyTypes)); setPowerUpGrid(Array(ROWS).fill(null).map(() => Array(COLS).fill(null))); setScore(0); setMovesLeft(level.moves); }}>Retry</button>}
+                                {levelResult === 'lose' && <button className="overlay-btn" style={styles.overlayBtn} onClick={() => { setGameOver(false); setLevelResult(null); setStars(0); setBonusPhaseRemaining(0); bonusPhaseRef.current = null; setGrid(createGrid(level.numCandyTypes, rows, cols)); setPowerUpGrid(createPowerUpGrid(rows, cols)); setScore(0); setMovesLeft(level.moves); }}>Retry</button>}
                                 <button className="overlay-btn" style={{ ...styles.overlayBtn, background: levelResult === 'win' ? 'var(--color-surface)' : undefined, border: '1px solid var(--color-border-strong)' }} onClick={() => onGameOver && onGameOver(score, levelIndex, levelResult === 'win')}>Back to Menu</button>
                             </div>
                         </div>
@@ -1265,12 +1385,12 @@
         const styles = {
             gameScreen: { width: '100%', minHeight: '100vh', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1, touchAction: 'none', overscrollBehavior: 'none' },
             hud: { position: 'absolute', top: 18, left: 18, right: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10, gap: 10 },
-            statPill: { background: 'rgba(38,34,55,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', padding: '14px 20px', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', color: 'var(--color-text)', fontWeight: 700, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 6px 24px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.04) inset' },
-            statLabel: { color: 'var(--color-text-muted)', fontSize: '0.7rem', marginRight: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' },
-            statValue: { color: 'var(--color-accent)', fontWeight: 800, letterSpacing: '-0.02em' },
-            statValueMoves: { color: 'var(--color-accent-2)', fontWeight: 800, letterSpacing: '-0.02em' },
+            statPill: { background: 'rgba(30,26,42,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', padding: '12px 18px', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: 700, border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' },
+            statLabel: { color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', marginRight: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' },
+            statValue: { color: '#ff8fab', fontWeight: 800, letterSpacing: '-0.02em', textShadow: '0 0 12px rgba(255,140,170,0.3)' },
+            statValueMoves: { color: '#ffd066', fontWeight: 800, letterSpacing: '-0.02em', textShadow: '0 0 10px rgba(255,208,100,0.25)' },
             gridWrap: { width: '100%', maxWidth: 400, display: 'flex', justifyContent: 'center', zIndex: 2, padding: '0 16px', touchAction: 'none' },
-            grid: { display: 'grid', gridTemplateColumns: `repeat(${COLS}, 1fr)`, gap: 5, width: 'min(84vmin, 320px)', height: 'min(84vmin, 320px)', flexShrink: 0, contain: 'layout style paint' },
+            grid: { display: 'grid', gridTemplateColumns: `repeat(var(--board-cols, 8), 1fr)`, gap: 6, width: 'min(84vmin, 320px)', height: 'min(84vmin, 320px)', flexShrink: 0, contain: 'layout style paint' },
             candy: { width: '100%', height: '100%', padding: 0 },
             overlay: { position: 'absolute', inset: 0, background: 'rgba(24,20,36,0.94)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 32, zIndex: 100, padding: 32 },
             overlayTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem, 9vw, 3.2rem)', fontWeight: 400, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, textShadow: '0 4px 24px rgba(0,0,0,0.5), 0 0 40px rgba(255,120,160,0.18)' },
@@ -1286,12 +1406,16 @@
         const STORAGE_KEY_HEARTS = 'seeker_crush_hearts';
         function getStoredUnlocked() {
             try {
+                const isLocalhost = typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+                if (isLocalhost) return LEVELS.length;
                 const v = parseInt(localStorage.getItem(STORAGE_KEY) || '1', 10);
-                return Math.min(20, Math.max(1, isNaN(v) ? 1 : v));
+                return Math.min(100, Math.max(1, isNaN(v) ? 1 : v));
             } catch (_) { return 1; }
         }
         function getHeartsState() {
             try {
+                const isLocalhost = typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+                if (isLocalhost) return { hearts: HEARTS_MAX, lastRefillAt: Date.now() };
                 const raw = localStorage.getItem(STORAGE_KEY_HEARTS);
                 let hearts = HEARTS_MAX, lastRefillAt = Date.now();
                 if (raw) {
@@ -1464,7 +1588,7 @@
                                 <div className="level-world__scroll">
                                     <header className="level-world__header">
                                         <h2 className="level-world__title">Levels</h2>
-                                        <p className="level-world__subtitle">{unlockedLevel} of 20 unlocked</p>
+                                        <p className="level-world__subtitle">{unlockedLevel} of {LEVELS.length} unlocked</p>
                                         <div className="hearts-wrap" style={{ marginTop: 8 }} aria-label={`${hearts} lives`}>
                                             {Array.from({ length: HEARTS_MAX }, (_, i) => (
                                                 <span key={i} className={'heart ' + (i < hearts ? 'heart--full' : 'heart--empty')}>{i < hearts ? '♥' : '♡'}</span>
