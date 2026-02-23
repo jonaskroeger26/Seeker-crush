@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Lilita+One&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
+            --radius-sm: 10px; --radius-md: 14px; --radius-lg: 18px; --radius-xl: 24px; --radius-full: 9999px;
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.12);
+            --shadow-md: 0 8px 32px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);
+            --shadow-strong: 0 24px 56px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06);
+            --shadow-glow-pink: 0 0 40px rgba(255, 120, 160, 0.35), 0 0 80px rgba(255, 100, 140, 0.12);
+            --color-bg: #1a1625;
+            --color-bg-elevated: #221e32;
+            --color-bg-card: rgba(34, 30, 48, 0.96);
+            --color-surface: rgba(255,255,255,0.06);
+            --color-border: rgba(255,255,255,0.1);
+            --color-border-strong: rgba(255,255,255,0.16);
+            --color-text: #faf8fc;
+            --color-text-muted: rgba(255,255,255,0.6);
+            --color-accent: #ff7a9e;
+            --color-accent-2: #ffcc5c;
+            --color-success: #72d996;
+            --font-ui: 'Outfit', system-ui, sans-serif;
+            --font-display: 'Lilita One', sans-serif;
+            --font-premium: 'Playfair Display', serif;
+        }
+        html, body { margin: 0; padding: 0; min-height: 100vh; height: 100%; }
+        #root { min-height: 100vh; height: 100%; display: block; }
+        body { font-family: var(--font-ui); -webkit-font-smoothing: antialiased; background: var(--color-bg); color: var(--color-text); }
+
+        #cc-loading {
+            position: fixed; inset: 0; z-index: 10000;
+            background: var(--color-bg);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: var(--space-8); box-sizing: border-box;
+        }
+        .cc-loading-logo {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 13vw, 4.25rem);
+            font-weight: 400;
+            letter-spacing: -0.04em;
+            color: var(--color-text);
+            margin-bottom: var(--space-2);
+            line-height: 1.02;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        .cc-loading-logo span { color: var(--color-accent); text-shadow: 0 0 36px rgba(255,120,160,0.32); }
+        .cc-loading-tagline {
+            font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.3em; color: var(--color-text-muted);
+            margin-bottom: var(--space-10);
+        }
+        .cc-loading-bar-wrap {
+            width: 100%; max-width: 260px; height: 5px;
+            background: rgba(255,255,255,0.06); border-radius: var(--radius-full);
+            overflow: hidden;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.2) inset;
+        }
+        .cc-loading-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
+            border-radius: var(--radius-full);
+            transition: width 0.12s ease-out;
+            box-shadow: 0 0 12px rgba(255,107,148,0.4);
+        }
+
+        .game-bg {
+            position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+            background: radial-gradient(ellipse 140% 100% at 50% -20%, rgba(100, 60, 140, 0.35) 0%, transparent 50%),
+                        radial-gradient(ellipse 90% 70% at 85% 100%, rgba(255, 100, 150, 0.1) 0%, transparent 50%),
+                        radial-gradient(ellipse 80% 80% at 15% 100%, rgba(90, 70, 160, 0.08) 0%, transparent 50%),
+                        linear-gradient(180deg, #1e1a2a 0%, #1a1625 35%, #16121f 100%);
+        }
+        .game-bg::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+            background-size: 28px 28px;
+            pointer-events: none;
+        }
+        .game-bg::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 100% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.12) 100%);
+            pointer-events: none;
+        }
+        @keyframes board-in {
+            0% { opacity: 0; transform: scale(0.9) translateY(24px); }
+            78% { opacity: 1; transform: scale(1.02) translateY(0); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .board-outer {
+            padding: 24px;
+            background: linear-gradient(165deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 30%, rgba(50,42,72,0.4) 60%, rgba(32,28,48,0.95) 100%);
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.15) inset, 0 2px 0 rgba(255,255,255,0.1), 0 24px 64px rgba(0,0,0,0.22), 0 0 48px rgba(80,50,120,0.12);
+            animation: board-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .board-inner {
+            position: relative;
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(48,42,68,0.95) 0%, rgba(32,28,48,0.98) 100%);
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3) inset, 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(255,255,255,0.03) inset;
+        }
+        .board-inner::before {
+            content: '';
+            position: absolute; inset: 16px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.02) 100%);
+            pointer-events: none;
+        }
+
+        /* Candy slot — soft well, crisp clip for animations */
+        .candy-cell {
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            padding: 0;
+            transition: box-shadow 0.2s ease;
+            min-width: 0; min-height: 0;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            background: linear-gradient(180deg, rgba(58,50,78,0.98) 0%, rgba(42,36,62,0.98) 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25) inset, 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            border: 1px solid rgba(255,255,255,0.05);
+            transform: translateZ(0);
+        }
+        .candy-cell::before {
+            content: '';
+            position: absolute; inset: 0;
+            border-radius: 12px;
+            background: linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 45%, rgba(70,60,100,0.12) 100%);
+            pointer-events: none;
+        }
+        .candy-cell::after {
+            content: '';
+            position: absolute; inset: 2px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+            pointer-events: none;
+        }
+        .candy-cell:active { transform: scale(0.97); }
+        .candy-cell.swap-anim { animation: swap-slide 0.12s ease-out forwards; z-index: 2; }
+        @keyframes swap-slide {
+            from { transform: translate(0, 0); }
+            to { transform: translate(var(--swap-dx, 0), var(--swap-dy, 0)); }
+        }
+        .menu-btn-primary { position: relative; overflow: hidden; border-radius: var(--radius-lg); }
+        .menu-btn-primary::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+        .menu-btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md), var(--shadow-glow-pink) !important; }
+        .menu-btn-primary:active { transform: translateY(0); }
+        .overlay-btn { border-radius: var(--radius-lg); }
+        .overlay-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md), var(--shadow-glow-pink) !important; }
+        .overlay-btn:active { transform: translateY(0); }
+
+        /* Pop: like Candy Crush — simple grow then vanish, no overshoot/wiggle */
+        @keyframes candy-pop {
+            0% { transform: translateZ(0) scale(1); opacity: 1; }
+            35% { transform: translateZ(0) scale(1.2); opacity: 1; }
+            100% { transform: translateZ(0) scale(0); opacity: 0; }
+        }
+        .candy-cell.popping {
+            animation: candy-pop 0.16s ease-out forwards;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        /* Drop: simple grow from top, no bounce — like real Candy Crush */
+        @keyframes candy-drop-inner {
+            0% { transform: scaleY(0); opacity: 1; }
+            100% { transform: scaleY(1); opacity: 1; }
+        }
+        .candy-cell.dropping .candy-inner {
+            transform-origin: 50% 0%;
+            animation: candy-drop-inner 0.2s ease-out forwards;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            will-change: transform;
+        }
+        .candy-cell.dropping[data-row="0"] .candy-inner { animation-delay: 0ms; }
+        .candy-cell.dropping[data-row="1"] .candy-inner { animation-delay: 28ms; }
+        .candy-cell.dropping[data-row="2"] .candy-inner { animation-delay: 56ms; }
+        .candy-cell.dropping[data-row="3"] .candy-inner { animation-delay: 84ms; }
+        .candy-cell.dropping[data-row="4"] .candy-inner { animation-delay: 112ms; }
+        .candy-cell.dropping[data-row="5"] .candy-inner { animation-delay: 140ms; }
+        .candy-cell.dropping[data-row="6"] .candy-inner { animation-delay: 168ms; }
+        .candy-cell.dropping[data-row="7"] .candy-inner { animation-delay: 196ms; }
+        .candy-cell .candy-inner {
+            position: absolute; inset: 0;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+            transform: translateZ(0);
+        }
+        /* Single drop-shadow per candy for smoother paint */
+        .candy-cell .candy-svg {
+            width: 180%; height: 180%;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+        }
+        .candy-cell .candy-img {
+            object-fit: contain;
+            display: block;
+            pointer-events: none;
+        }
+        .candy-cell[data-type="0"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="1"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="2"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="3"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        .candy-cell[data-type="4"] .candy-svg { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); }
+        /* Powerups: use generated images when available; hide CSS overlays */
+        .candy-cell.striped-h::after,
+        .candy-cell.striped-v::after,
+        .candy-cell.wrapped::after { display: none; }
+        .candy-cell .candy-powerup-img {
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+        }
+        .candy-cell.color-bomb .candy-powerup-img {
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)) drop-shadow(0 0 16px rgba(255,200,120,0.5));
+            animation: color-bomb-glow 2s ease-in-out infinite;
+        }
+        @keyframes color-bomb-glow {
+            0%, 100% { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)) drop-shadow(0 0 14px rgba(255,200,120,0.45)); }
+            50% { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)) drop-shadow(0 0 22px rgba(255,220,140,0.65)); }
+        }
+        .game-pause-btn:hover { background: rgba(50,45,70,0.95); border-color: rgba(255,255,255,0.2); }
+        .game-pause-btn:active { transform: scale(0.96); }
+        .star { transition: transform 0.2s ease, filter 0.2s ease; }
+        .star-filled { color: #ffcc5c; filter: drop-shadow(0 0 10px rgba(255,204,92,0.75)); text-shadow: 0 0 14px rgba(255,204,92,0.5); }
+        .star-empty { color: rgba(255,255,255,0.18); }
+        .level-stars .star-filled { animation: star-pop 0.4s ease-out backwards; }
+        .level-stars .star-filled:nth-child(1) { animation-delay: 0.05s; }
+        .level-stars .star-filled:nth-child(2) { animation-delay: 0.15s; }
+        .level-stars .star-filled:nth-child(3) { animation-delay: 0.25s; }
+        @keyframes star-pop {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .score-pop {
+            position: fixed; z-index: 200;
+            font-family: var(--font-ui); font-weight: 800; font-size: 2rem;
+            color: #fff;
+            text-shadow: 0 0 32px rgba(255,120,160,0.8), 0 0 16px rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.35);
+            pointer-events: none;
+            left: 50%; top: 42%; transform: translate(-50%, -50%);
+            animation: scorePop 0.7s cubic-bezier(0.22, 1.1, 0.36, 1) forwards;
+        }
+        @keyframes scorePop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+            18% { opacity: 1; transform: translate(-50%, -50%) scale(1.35); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 0; transform: translate(-50%, -90px) scale(1); }
+        }
+
+        /* Start menu: falling candy images */
+        .menu-fall-wrap { position: relative; overflow: hidden; min-height: 100vh; width: 100%; background: linear-gradient(180deg, #1e1a2a 0%, #1a1625 100%); }
+        .menu-fall-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+        .menu-fall-candy {
+            position: absolute; width: 80px; height: 80px;
+            top: -120px;
+            animation: menu-fall 16s linear infinite;
+        }
+        .menu-fall-candy img {
+            width: 100%; height: 100%; object-fit: contain; display: block;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+            opacity: 0.85;
+        }
+        @keyframes menu-fall {
+            0% { transform: translateY(-100%) rotate(0deg); }
+            100% { transform: translateY(calc(100vh + 100%)) rotate(360deg); }
+        }
+        .menu-content { position: relative; z-index: 1; }
+
+        /* Level select — only the grid scrolls */
+        .level-world-wrap {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .level-world {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: linear-gradient(165deg, #1c1525 0%, #16121f 40%, #0f0d18 100%);
+            box-sizing: border-box;
+            position: relative;
+        }
+        .level-world::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 100% 60% at 50% -20%, rgba(255,120,160,0.12) 0%, transparent 50%),
+                        radial-gradient(ellipse 80% 50% at 80% 80%, rgba(255,180,100,0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .level-world__scroll {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 72px 20px 20px;
+            max-width: 440px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .level-world__grid-wrap {
+            flex: 1 1 0;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 0 80px;
+        }
+        .level-world__back {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 20;
+            padding: 10px 18px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+        }
+        .level-world__back:hover {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.2);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+        .level-world__header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        .level-world__title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 400;
+            letter-spacing: -0.03em;
+            margin: 0 0 6px 0;
+            background: linear-gradient(135deg, #fff 0%, #ffb8c8 50%, #ffcc88 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .level-world__subtitle {
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            color: rgba(255,255,255,0.55);
+        }
+        .level-world__grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        @media (max-width: 380px) {
+            .level-world__grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        }
+        .level-card {
+            aspect-ratio: 1;
+            border-radius: 18px;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.2s ease;
+            font-family: var(--font-ui);
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(165deg, rgba(255,180,200,0.2) 0%, rgba(255,140,160,0.12) 50%, rgba(200,120,180,0.08) 100%);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 6px 0 rgba(180,70,100,0.25), 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .level-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+        .level-card:active { transform: scale(0.96); }
+        .level-card:hover:not(.level-card--locked) {
+            transform: translateY(-4px);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.2) inset, 0 8px 0 rgba(180,70,100,0.3), 0 16px 32px rgba(0,0,0,0.25), 0 0 24px rgba(255,140,180,0.15);
+            filter: brightness(1.08);
+        }
+        .level-card--locked {
+            background: linear-gradient(180deg, rgba(50,45,65,0.6) 0%, rgba(35,30,50,0.8) 100%);
+            border-color: rgba(255,255,255,0.06);
+            cursor: not-allowed;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3) inset;
+        }
+        .level-card--locked::before { opacity: 0.3; }
+        .level-card--locked:hover { transform: none; filter: none; }
+        .level-card--completed {
+            background: linear-gradient(165deg, rgba(120,220,160,0.25) 0%, rgba(80,190,120,0.18) 50%, rgba(60,170,100,0.12) 100%);
+            border-color: rgba(120,220,160,0.35);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 6px 0 rgba(40,120,70,0.3), 0 8px 24px rgba(0,0,0,0.18);
+        }
+        .level-card--completed:hover:not(.level-card--locked) {
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset, 0 8px 0 rgba(40,120,70,0.35), 0 14px 28px rgba(0,0,0,0.22);
+            filter: brightness(1.06);
+        }
+        .level-card__num {
+            position: relative;
+            z-index: 1;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .level-card--locked .level-card__num { color: rgba(255,255,255,0.4); }
+        .level-card__meta {
+            position: relative;
+            z-index: 1;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+            letter-spacing: 0.04em;
+        }
+        .level-card--locked .level-card__meta { color: rgba(255,255,255,0.3); }
+        .level-card__stars {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 3px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            filter: drop-shadow(0 0 6px rgba(255,200,80,0.4));
+        }
+        .level-card__stars .star-on { color: #ffd54f; }
+        .level-card__stars .star-off { color: rgba(255,255,255,0.2); }
+        .hearts-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .hearts-wrap .heart {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+        .hearts-wrap .heart--full { color: #ff6b8a; filter: drop-shadow(0 0 6px rgba(255,107,138,0.5)); }
+        .hearts-wrap .heart--empty { color: rgba(255,255,255,0.2); }
+        .level-card__lock {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            opacity: 0.35;
+            z-index: 0;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#16121f">
+    <meta name="apple-mobile-web-app-title" content="Seeker Crush">
+    <title>Seeker Crush - Solana</title>
+    <link rel="manifest" href="manifest.json">
+    <script defer src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script defer src="https://unpkg.com/@onsol/tldparser@0.5.2/lib/index.iife.js"></script>
+    <script defer crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script defer crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="/mwa-bundle.js"></script>
+    <script>
+        if (typeof window.__snakeWalletAdapter === 'undefined') {
+            window.__snakeWalletAdapter = { ready: false, connect: null, disconnect: null };
+        }
+    </script>
+</head>
+<body>
+    <div id="cc-loading">
+        <div class="cc-loading-logo">Seeker <span>Crush</span></div>
+        <div class="cc-loading-tagline">Solana dApp</div>
+        <div class="cc-loading-bar-wrap"><div class="cc-loading-bar" id="cc-loading-bar"></div></div>
+    </div>
+    <div id="root"></div>
+    <script type="text/babel" data-type="module">
+        const { useState, useEffect, useRef } = React;
+
+        const SUPABASE_URL = 'https://aukbtnujqzilrqxgelxq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1a2J0bnVqcXppbHJxeGdlbHhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTc1NjQsImV4cCI6MjA4NTY5MzU2NH0.PGwNORkCQn_EztvA4EKoWYQZ3xlhS1a9g-NGPSTL6d4';
+        const supabase = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_KEY);
+
+        const CANDY_STYLES = [
+            { bg: 'linear-gradient(165deg, #ffcdd2 0%, #ff8a80 22%, #ff5252 55%, #c62828 85%, #8b0000 100%)', shadow: '0 8px 24px rgba(198,40,40,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.5)' },
+            { bg: 'linear-gradient(165deg, #fffde7 0%, #fff59d 22%, #ffeb3b 55%, #ffc107 85%, #ff8f00 100%)', shadow: '0 8px 24px rgba(255,193,7,0.4), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.55)' },
+            { bg: 'linear-gradient(165deg, #e8f5e9 0%, #a5d6a7 22%, #66bb6a 55%, #43a047 85%, #2e7d32 100%)', shadow: '0 8px 24px rgba(67,160,71,0.4), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.4)' },
+            { bg: 'linear-gradient(165deg, #e3f2fd 0%, #90caf9 22%, #42a5f5 55%, #1e88e5 85%, #1565c0 100%)', shadow: '0 8px 24px rgba(30,136,229,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.45)' },
+            { bg: 'linear-gradient(165deg, #f3e5f5 0%, #ce93d8 22%, #ba68c8 55%, #ab47bc 85%, #7b1fa2 100%)', shadow: '0 8px 24px rgba(171,71,188,0.45), 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4)' }
+        ];
+        const COLS = 8;
+        const ROWS = 8;
+        const POINTS_PER_CANDY = 3;
+        const BONUS_4 = 5;
+        const BONUS_5 = 15;
+        const BONUS_CASCADE = 2;
+        const SWAP_MS = 120;
+        const POP_MS = 200;
+        const DROP_MS = 420;
+        const STAR_2_RATIO = 1.25;
+        const STAR_3_RATIO = 1.5;
+
+        function getStars(score, targetScore) {
+            if (score < targetScore) return 0;
+            if (score >= targetScore * STAR_3_RATIO) return 3;
+            if (score >= targetScore * STAR_2_RATIO) return 2;
+            return 1;
+        }
+
+        const LEVELS = [
+            { moves: 15, targetScore: 420, numCandyTypes: 5 },
+            { moves: 15, targetScore: 460, numCandyTypes: 5 },
+            { moves: 14, targetScore: 640, numCandyTypes: 5 },
+            { moves: 13, targetScore: 780, numCandyTypes: 5 },
+            { moves: 13, targetScore: 940, numCandyTypes: 5 },
+            { moves: 12, targetScore: 1120, numCandyTypes: 5 },
+            { moves: 12, targetScore: 1320, numCandyTypes: 5 },
+            { moves: 12, targetScore: 1550, numCandyTypes: 5 },
+            { moves: 11, targetScore: 1820, numCandyTypes: 5 },
+            { moves: 11, targetScore: 2120, numCandyTypes: 5 },
+            { moves: 11, targetScore: 2450, numCandyTypes: 5 },
+            { moves: 10, targetScore: 2820, numCandyTypes: 5 },
+            { moves: 10, targetScore: 3240, numCandyTypes: 5 },
+            { moves: 10, targetScore: 3700, numCandyTypes: 5 },
+            { moves: 10, targetScore: 4200, numCandyTypes: 5 },
+            { moves: 9, targetScore: 4750, numCandyTypes: 5 },
+            { moves: 9, targetScore: 5350, numCandyTypes: 5 },
+            { moves: 9, targetScore: 6000, numCandyTypes: 5 },
+            { moves: 9, targetScore: 6700, numCandyTypes: 5 },
+            { moves: 8, targetScore: 7450, numCandyTypes: 5 }
+        ];
+
+        function getRandomCandy(maxTypes) {
+            const n = maxTypes != null ? Math.min(maxTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
+            return Math.floor(Math.random() * n);
+        }
+
+        const CANDY_IMAGE_SRCS = ['/candy-0.png', '/candy-1.png', '/candy-2.png', '/candy-3.png', '/candy-4.png'];
+        const POWERUP_IMAGE_SRCS = {
+            'striped-h': '/powerup-striped-h.png',
+            'striped-v': '/powerup-striped-v.png',
+            'wrapped': '/powerup-wrapped.png',
+            'color-bomb': '/powerup-color-bomb.png'
+        };
+
+        function removeImageBackground(src, opts) {
+            const lightThreshold = (opts && opts.light != null) ? opts.light : 228;
+            const darkThreshold = (opts && opts.dark != null) ? opts.dark : 35;
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        for (let i = 0; i < data.data.length; i += 4) {
+                            const r = data.data[i], g = data.data[i + 1], b = data.data[i + 2];
+                            const isLight = r >= lightThreshold && g >= lightThreshold && b >= lightThreshold;
+                            const isDark = r <= darkThreshold && g <= darkThreshold && b <= darkThreshold;
+                            if (isLight || isDark) data.data[i + 3] = 0;
+                        }
+                        ctx.putImageData(data, 0, 0);
+                        resolve(canvas.toDataURL('image/png'));
+                    } catch (e) {
+                        resolve(src);
+                    }
+                };
+                img.onerror = () => resolve(src);
+                img.src = src;
+            });
+        }
+
+        function CandyIcon({ type, cellKey, powerUp, candyUrls, powerupUrls }) {
+            const w = 24, h = 24;
+            const uid = cellKey ? cellKey.replace(',', '-') : type;
+            if (powerUp && POWERUP_IMAGE_SRCS[powerUp]) {
+                const src = (powerupUrls && powerupUrls[powerUp]) || POWERUP_IMAGE_SRCS[powerUp];
+                return (
+                    <img
+                        src={src}
+                        alt=""
+                        className="candy-svg candy-img candy-powerup-img"
+                        width={w}
+                        height={h}
+                        draggable={false}
+                        loading="eager"
+                    />
+                );
+            }
+            if (type >= 0 && type < CANDY_IMAGE_SRCS.length) {
+                const src = (candyUrls && candyUrls[type]) || CANDY_IMAGE_SRCS[type];
+                return (
+                    <img
+                        src={src}
+                        alt=""
+                        className="candy-svg candy-img"
+                        width={w}
+                        height={h}
+                        draggable={false}
+                        loading="eager"
+                    />
+                );
+            }
+            return null;
+        }
+
+        function createGrid(numCandyTypes) {
+            const maxT = numCandyTypes != null ? Math.min(numCandyTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
+            const grid = [];
+            for (let r = 0; r < ROWS; r++) {
+                grid[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    let candy = getRandomCandy(maxT);
+                    while ((c >= 2 && grid[r][c-1] === candy && grid[r][c-2] === candy) ||
+                           (r >= 2 && grid[r-1]?.[c] === candy && grid[r-2]?.[c] === candy)) {
+                        candy = getRandomCandy(maxT);
+                    }
+                    grid[r][c] = candy;
+                }
+            }
+            return grid;
+        }
+
+        function createPowerUpGrid() {
+            return Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
+        }
+
+        function findMatches(grid) {
+            const set = new Set();
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c <= COLS - 3; c++) {
+                    const v = grid[r][c];
+                    if (v === grid[r][c+1] && v === grid[r][c+2]) {
+                        set.add(`${r},${c}`); set.add(`${r},${c+1}`); set.add(`${r},${c+2}`);
+                    }
+                }
+            }
+            for (let c = 0; c < COLS; c++) {
+                for (let r = 0; r <= ROWS - 3; r++) {
+                    const v = grid[r][c];
+                    if (v === grid[r+1]?.[c] && v === grid[r+2]?.[c]) {
+                        set.add(`${r},${c}`); set.add(`${r+1},${c}`); set.add(`${r+2},${c}`);
+                    }
+                }
+            }
+            return Array.from(set).map(s => s.split(',').map(Number));
+        }
+
+        function findRuns(grid) {
+            const runs = [];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c <= COLS - 3; c++) {
+                    const v = grid[r][c];
+                    let len = 1;
+                    while (c + len < COLS && grid[r][c + len] === v) len++;
+                    if (len >= 3) {
+                        runs.push({ coords: Array.from({ length: len }, (_, i) => [r, c + i]), dir: 'h', length: len });
+                        c += len - 1;
+                    }
+                }
+            }
+            for (let c = 0; c < COLS; c++) {
+                for (let r = 0; r <= ROWS - 3; r++) {
+                    const v = grid[r][c];
+                    let len = 1;
+                    while (r + len < ROWS && grid[r + len][c] === v) len++;
+                    if (len >= 3) {
+                        runs.push({ coords: Array.from({ length: len }, (_, i) => [r + i, c]), dir: 'v', length: len });
+                        r += len - 1;
+                    }
+                }
+            }
+            return runs;
+        }
+
+        function getCellsToRemoveAndPowerUps(grid, powerUpGrid, matchCoords) {
+            const toRemove = new Set(matchCoords.map(([r,c]) => `${r},${c}`));
+            const runs = findRuns(grid);
+            const horRuns = runs.filter(r => r.dir === 'h');
+            const verRuns = runs.filter(r => r.dir === 'v');
+            const wrappedCells = new Set();
+            horRuns.forEach(hr => {
+                verRuns.forEach(vr => {
+                    const hSet = new Set(hr.coords.map(([r,c]) => `${r},${c}`));
+                    const shared = vr.coords.filter(([r,c]) => hSet.has(`${r},${c}`));
+                    if (shared.length === 1 && hr.length + vr.length - 1 >= 5) {
+                        const [r, c] = shared[0];
+                        wrappedCells.add(`${r},${c}`);
+                        powerUpGrid[r][c] = 'wrapped';
+                    }
+                });
+            });
+            runs.forEach(run => {
+                if (run.length === 4) {
+                    const [r, c] = run.coords[1];
+                    if (powerUpGrid[r][c] !== 'wrapped')
+                        powerUpGrid[r][c] = run.dir === 'h' ? 'striped-h' : 'striped-v';
+                } else if (run.length >= 5 && (run.dir === 'h' || run.dir === 'v')) {
+                    const [r, c] = run.coords[Math.floor(run.length / 2)];
+                    if (powerUpGrid[r][c] !== 'wrapped')
+                        powerUpGrid[r][c] = 'color-bomb';
+                }
+            });
+            const priority = ['wrapped', 'color-bomb', 'striped-h', 'striped-v'];
+            let powerupCell = null;
+            for (const key of toRemove) {
+                const [r, c] = key.split(',').map(Number);
+                const pu = powerUpGrid[r][c];
+                if (pu && (!powerupCell || priority.indexOf(pu) < priority.indexOf(powerUpGrid[powerupCell.r][powerupCell.c])))
+                    powerupCell = { r, c };
+            }
+            if (powerupCell) toRemove.delete(`${powerupCell.r},${powerupCell.c}`);
+            return { toRemove: Array.from(toRemove).map(s => s.split(',').map(Number)) };
+        }
+
+        function getPowerUpEffectCells(grid, powerUpGrid, pr, pc, otherR, otherC) {
+            const pu = powerUpGrid[pr]?.[pc];
+            if (!pu) return [];
+            const out = [[pr, pc]];
+            if (pu === 'striped-h') {
+                for (let col = 0; col < COLS; col++) out.push([pr, col]);
+            } else if (pu === 'striped-v') {
+                for (let row = 0; row < ROWS; row++) out.push([row, pc]);
+            } else if (pu === 'wrapped') {
+                for (let dr = -1; dr <= 1; dr++)
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nr = pr + dr, nc = pc + dc;
+                        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) out.push([nr, nc]);
+                    }
+            } else if (pu === 'color-bomb') {
+                const color = grid[otherR][otherC];
+                for (let rr = 0; rr < ROWS; rr++)
+                    for (let cc = 0; cc < COLS; cc++)
+                        if (grid[rr][cc] === color) out.push([rr, cc]);
+            }
+            return out;
+        }
+
+        function getRandomBonusEffectCells(grid, powerUpGrid, numCandyTypes) {
+            const types = ['striped-h', 'striped-v', 'wrapped', 'color-bomb'];
+            const t = types[Math.floor(Math.random() * types.length)];
+            const out = [];
+            if (t === 'striped-h') {
+                const r = Math.floor(Math.random() * ROWS);
+                for (let c = 0; c < COLS; c++) out.push([r, c]);
+            } else if (t === 'striped-v') {
+                const c = Math.floor(Math.random() * COLS);
+                for (let r = 0; r < ROWS; r++) out.push([r, c]);
+            } else if (t === 'wrapped') {
+                const cr = 1 + Math.floor(Math.random() * (ROWS - 2));
+                const cc = 1 + Math.floor(Math.random() * (COLS - 2));
+                for (let dr = -1; dr <= 1; dr++)
+                    for (let dc = -1; dc <= 1; dc++) out.push([cr + dr, cc + dc]);
+            } else {
+                const maxT = numCandyTypes != null ? Math.min(numCandyTypes, 5) : 5;
+                const color = Math.floor(Math.random() * maxT);
+                for (let rr = 0; rr < ROWS; rr++)
+                    for (let cc = 0; cc < COLS; cc++)
+                        if (grid[rr][cc] === color) out.push([rr, cc]);
+            }
+            return out;
+        }
+
+        function removeAndDrop(grid, powerUpGrid, toRemove, numCandyTypes) {
+            const maxT = numCandyTypes != null ? Math.min(numCandyTypes, CANDY_STYLES.length) : CANDY_STYLES.length;
+            const colsToDrop = new Set(toRemove.map(([r,c]) => c));
+            for (const c of colsToDrop) {
+                const colCells = [];
+                const colPowers = [];
+                for (let r = 0; r < ROWS; r++) {
+                    if (!toRemove.some(([mr,mc]) => mr === r && mc === c)) {
+                        colCells.push(grid[r][c]);
+                        colPowers.push(powerUpGrid[r][c]);
+                    }
+                }
+                const removed = ROWS - colCells.length;
+                for (let i = 0; i < removed; i++) {
+                    colCells.unshift(getRandomCandy(maxT));
+                    colPowers.unshift(null);
+                }
+                for (let r = 0; r < ROWS; r++) {
+                    grid[r][c] = colCells[r];
+                    powerUpGrid[r][c] = colPowers[r];
+                }
+            }
+        }
+
+        function swap(grid, powerUpGrid, r1, c1, r2, c2) {
+            const t = grid[r1][c1];
+            grid[r1][c1] = grid[r2][c2];
+            grid[r2][c2] = t;
+            const p = powerUpGrid[r1][c1];
+            powerUpGrid[r1][c1] = powerUpGrid[r2][c2];
+            powerUpGrid[r2][c2] = p;
+        }
+
+        function areAdjacent(r1, c1, r2, c2) {
+            return (Math.abs(r1 - r2) === 1 && c1 === c2) || (Math.abs(c1 - c2) === 1 && r1 === r2);
+        }
+
+        function Match3Game({ levelIndex, hearts = 5, onGameOver, onLevelComplete, onNextLevel, walletAddress, skrName }) {
+            const level = LEVELS[levelIndex] || LEVELS[0];
+            const [grid, setGrid] = useState(() => createGrid(level.numCandyTypes));
+            const [powerUpGrid, setPowerUpGrid] = useState(() => createPowerUpGrid());
+            const [score, setScore] = useState(0);
+            const [movesLeft, setMovesLeft] = useState(level.moves);
+            const [dragStart, setDragStart] = useState(null);
+            const [dragCurrent, setDragCurrent] = useState(null);
+            const [animatingOut, setAnimatingOut] = useState(new Set());
+            const [animatingDrop, setAnimatingDrop] = useState(new Set());
+            const [swapAnim, setSwapAnim] = useState(null);
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [gameOver, setGameOver] = useState(false);
+            const [levelResult, setLevelResult] = useState(null);
+            const [stars, setStars] = useState(0);
+            const [bonusPhaseRemaining, setBonusPhaseRemaining] = useState(0);
+            const [scorePopups, setScorePopups] = useState([]);
+            const popupIdRef = useRef(0);
+            const boardRef = useRef(null);
+            const bonusPhaseRef = useRef(null);
+            const dragPointerIdRef = useRef(null);
+            const [candyUrls, setCandyUrls] = useState(() => []);
+            const [powerupUrls, setPowerupUrls] = useState(() => ({}));
+            const [isPaused, setIsPaused] = useState(false);
+
+            const addScorePopup = (value) => {
+                const id = ++popupIdRef.current;
+                setScorePopups(prev => [...prev, { id, value }]);
+                setTimeout(() => setScorePopups(prev => prev.filter(p => p.id !== id)), 780);
+            };
+
+            const processMatchCycle = useRef((g, pug, cascadeLevel, onPoints) => {
+                const matchCoords = findMatches(g);
+                if (matchCoords.length === 0) return false;
+                const runs = findRuns(g);
+                const { toRemove } = getCellsToRemoveAndPowerUps(g, pug, matchCoords);
+                let points = toRemove.length * POINTS_PER_CANDY;
+                const maxRun = runs.length ? Math.max(...runs.map(r => r.length)) : 3;
+                if (maxRun >= 5) points += BONUS_5;
+                else if (maxRun >= 4) points += BONUS_4;
+                points += cascadeLevel * BONUS_CASCADE;
+                removeAndDrop(g, pug, toRemove, level.numCandyTypes);
+                onPoints(points);
+                return true;
+            });
+
+            const trySwap = (r1, c1, r2, c2) => {
+                if (gameOver || isPaused || isProcessing || bonusPhaseRemaining > 0 || movesLeft <= 0 || !areAdjacent(r1, c1, r2, c2)) return;
+                const hasPowerup = powerUpGrid[r1][c1] || powerUpGrid[r2][c2];
+                const g = grid.map(row => [...row]);
+                const pug = powerUpGrid.map(row => [...row]);
+                swap(g, pug, r1, c1, r2, c2);
+                const matches = findMatches(g);
+                if (matches.length === 0 && !hasPowerup) {
+                    setDragStart(null);
+                    setDragCurrent(null);
+                    setSwapAnim({ r1, c1, r2, c2 });
+                    setGrid(g.map(row => [...row]));
+                    setPowerUpGrid(pug.map(row => [...row]));
+                    setTimeout(() => {
+                        swap(g, pug, r1, c1, r2, c2);
+                        setGrid(g.map(row => [...row]));
+                        setPowerUpGrid(pug.map(row => [...row]));
+                        setSwapAnim(null);
+                    }, 180);
+                    return;
+                }
+                setDragStart(null);
+                setDragCurrent(null);
+                setIsProcessing(true);
+                setMovesLeft(m => m - 1);
+                // Powerup effects only for powerups that were already on the board (Candy Crush style:
+                // a powerup created by this match must not trigger until the player swaps it later).
+                const effect1 = getPowerUpEffectCells(g, pug, r1, c1, r2, c2);
+                const effect2 = getPowerUpEffectCells(g, pug, r2, c2, r1, c1);
+                const matchResult = getCellsToRemoveAndPowerUps(g, pug, matches);
+                const toRemoveSet = new Set(matchResult.toRemove.map(([r,c]) => `${r},${c}`));
+                effect1.forEach(([r,c]) => toRemoveSet.add(`${r},${c}`));
+                effect2.forEach(([r,c]) => toRemoveSet.add(`${r},${c}`));
+                const toRemove = Array.from(toRemoveSet).map(s => s.split(',').map(Number));
+                const runs = findRuns(g);
+                let points = toRemove.length * POINTS_PER_CANDY;
+                const maxRun = runs.length ? Math.max(...runs.map(r => r.length)) : 3;
+                if (maxRun >= 5) points += BONUS_5;
+                else if (maxRun >= 4) points += BONUS_4;
+                let totalPoints = points;
+                setSwapAnim({ r1, c1, r2, c2 });
+                setTimeout(() => {
+                    setGrid(g.map(row => [...row]));
+                    setPowerUpGrid(pug.map(row => [...row]));
+                    setSwapAnim(null);
+                    setAnimatingOut(new Set(toRemove.map(([r,c]) => `${r},${c}`)));
+                    setTimeout(() => {
+                        removeAndDrop(g, pug, toRemove, level.numCandyTypes);
+                        const dropSet = new Set();
+                        for (let c = 0; c < COLS; c++) {
+                            const removedInCol = toRemove.filter(([rr, cc]) => cc === c).length;
+                            for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
+                        }
+                        const nextGrid = g.map(row => [...row]);
+                        const nextPug = pug.map(row => [...row]);
+                        requestAnimationFrame(() => {
+                            setAnimatingDrop(dropSet);
+                            setGrid(nextGrid);
+                            setPowerUpGrid(nextPug);
+                            setAnimatingOut(new Set());
+                            setScore(s => { addScorePopup(points); return s + points; });
+                        });
+                        setTimeout(() => {
+                            setAnimatingDrop(new Set());
+                            const runCascade = (cascadeLevel) => {
+                            const matchCoords = findMatches(g);
+                            if (matchCoords.length === 0) {
+                                setGrid([...g.map(row => [...row])]);
+                                setPowerUpGrid(pug.map(row => [...row]));
+                                setIsProcessing(false);
+                                const finalScore = score + totalPoints;
+                                if (finalScore >= level.targetScore) {
+                                    setScore(finalScore);
+                                    if (movesLeft - 1 <= 0) {
+                                        setGameOver(true);
+                                        setLevelResult('win');
+                                        setStars(getStars(finalScore, level.targetScore));
+                                        setTimeout(() => {
+                                            if (supabase && walletAddress) {
+                                                supabase.from('leaderboards').insert({
+                                                    wallet_address: walletAddress,
+                                                    skr_name: skrName || null,
+                                                    score: finalScore,
+                                                    game_mode: 'seeker_crush',
+                                                    difficulty: 'classic'
+                                                }).then(() => {});
+                                            }
+                                            if (onLevelComplete) onLevelComplete(levelIndex);
+                                            if (onGameOver) onGameOver(finalScore, levelIndex, true);
+                                        }, 400);
+                                    } else {
+                                        bonusPhaseRef.current = {
+                                            grid: g.map(row => [...row]),
+                                            powerUpGrid: pug.map(row => [...row]),
+                                            score: finalScore,
+                                            remaining: movesLeft,
+                                            numCandyTypes: level.numCandyTypes,
+                                            targetScore: level.targetScore
+                                        };
+                                        setBonusPhaseRemaining(movesLeft);
+                                    }
+                                    return;
+                                }
+                                if (movesLeft - 1 <= 0) {
+                                    setGameOver(true);
+                                    setLevelResult('lose');
+                                    setScore(finalScore);
+                                    setTimeout(() => {
+                                        if (supabase && walletAddress) {
+                                            supabase.from('leaderboards').insert({
+                                                wallet_address: walletAddress,
+                                                skr_name: skrName || null,
+                                                score: finalScore,
+                                                game_mode: 'seeker_crush',
+                                                difficulty: 'classic'
+                                            }).then(() => {});
+                                        }
+                                        if (onGameOver) onGameOver(finalScore, levelIndex, false);
+                                    }, 400);
+                                }
+                                return;
+                            }
+                            const nextResult = getCellsToRemoveAndPowerUps(g, pug, matchCoords);
+                            const nextToRemove = nextResult.toRemove;
+                            const nextRuns = findRuns(g);
+                            let nextPoints = nextToRemove.length * POINTS_PER_CANDY;
+                            const nextMaxRun = nextRuns.length ? Math.max(...nextRuns.map(r => r.length)) : 3;
+                            if (nextMaxRun >= 5) nextPoints += BONUS_5;
+                            else if (nextMaxRun >= 4) nextPoints += BONUS_4;
+                            nextPoints += cascadeLevel * BONUS_CASCADE;
+                            totalPoints += nextPoints;
+                            setAnimatingOut(new Set(nextToRemove.map(([r,c]) => `${r},${c}`)));
+                            setTimeout(() => {
+                                removeAndDrop(g, pug, nextToRemove, level.numCandyTypes);
+                                const dropSet = new Set();
+                                for (let c = 0; c < COLS; c++) {
+                                    const removedInCol = nextToRemove.filter(([rr, cc]) => cc === c).length;
+                                    for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
+                                }
+                                const nextGrid = g.map(row => [...row]);
+                                const nextPug = pug.map(row => [...row]);
+                                requestAnimationFrame(() => {
+                                    setAnimatingDrop(dropSet);
+                                    setGrid(nextGrid);
+                                    setPowerUpGrid(nextPug);
+                                    setAnimatingOut(new Set());
+                                    setScore(s => { addScorePopup(nextPoints); return s + nextPoints; });
+                                });
+                                setTimeout(() => {
+                                    setAnimatingDrop(new Set());
+                                    runCascade(cascadeLevel + 1);
+                                }, DROP_MS);
+                            }, POP_MS);
+                        };
+                                runCascade(1);
+                        }, DROP_MS);
+                    }, POP_MS);
+                }, SWAP_MS);
+            };
+
+            const handlePointerDown = (r, c, pointerId) => {
+                if (gameOver || isProcessing || bonusPhaseRemaining > 0 || movesLeft <= 0) return;
+                dragPointerIdRef.current = pointerId != null ? pointerId : undefined;
+                setDragStart({ r, c });
+                setDragCurrent({ r, c });
+            };
+
+            const handlePointerEnter = (r, c) => {
+                if (dragStart) setDragCurrent({ r, c });
+            };
+
+            const handlePointerUp = (e) => {
+                if (dragPointerIdRef.current != null && e.pointerId !== dragPointerIdRef.current) return;
+                if (dragStart && dragCurrent && (dragStart.r !== dragCurrent.r || dragStart.c !== dragCurrent.c)) {
+                    trySwap(dragStart.r, dragStart.c, dragCurrent.r, dragCurrent.c);
+                } else {
+                    setDragStart(null);
+                    setDragCurrent(null);
+                }
+                dragPointerIdRef.current = null;
+            };
+
+            useEffect(() => {
+                const move = (e) => {
+                    if (dragStart == null || (dragPointerIdRef.current != null && e.pointerId !== dragPointerIdRef.current)) return;
+                    const el = document.elementFromPoint(e.clientX, e.clientY);
+                    const cell = el?.closest?.('.candy-cell');
+                    if (cell && cell.dataset.row != null && cell.dataset.col != null) {
+                        const r = parseInt(cell.dataset.row, 10);
+                        const c = parseInt(cell.dataset.col, 10);
+                        if (!isNaN(r) && !isNaN(c)) setDragCurrent({ r, c });
+                    }
+                };
+                const up = (e) => handlePointerUp(e);
+                document.addEventListener('pointermove', move, { passive: true });
+                document.addEventListener('pointerup', up);
+                document.addEventListener('pointercancel', up);
+                return () => {
+                    document.removeEventListener('pointermove', move);
+                    document.removeEventListener('pointerup', up);
+                    document.removeEventListener('pointercancel', up);
+                };
+            }, [dragStart, dragCurrent, grid, powerUpGrid, movesLeft, isProcessing, gameOver]);
+
+            useEffect(() => {
+                if (bonusPhaseRemaining <= 0) {
+                    if (bonusPhaseRef.current) {
+                        const ref = bonusPhaseRef.current;
+                        setGameOver(true);
+                        setLevelResult('win');
+                        setStars(getStars(ref.score, ref.targetScore));
+                        setScore(ref.score);
+                        bonusPhaseRef.current = null;
+                        setTimeout(() => {
+                            if (supabase && walletAddress) {
+                                supabase.from('leaderboards').insert({
+                                    wallet_address: walletAddress,
+                                    skr_name: skrName || null,
+                                    score: ref.score,
+                                    game_mode: 'seeker_crush',
+                                    difficulty: 'classic'
+                                }).then(() => {});
+                            }
+                            if (onLevelComplete) onLevelComplete(levelIndex);
+                            if (onGameOver) onGameOver(ref.score, levelIndex, true);
+                        }, 400);
+                    }
+                    return;
+                }
+                const ref = bonusPhaseRef.current;
+                if (!ref || ref.remaining <= 0) return;
+                const toRemove = getRandomBonusEffectCells(ref.grid, ref.powerUpGrid, ref.numCandyTypes);
+                if (toRemove.length === 0) {
+                    setBonusPhaseRemaining(0);
+                    return;
+                }
+                removeAndDrop(ref.grid, ref.powerUpGrid, toRemove, ref.numCandyTypes);
+                const points = toRemove.length * POINTS_PER_CANDY;
+                ref.score += points;
+                ref.remaining -= 1;
+                setAnimatingOut(new Set(toRemove.map(([r,c]) => `${r},${c}`)));
+                const dropSet = new Set();
+                for (let c = 0; c < COLS; c++) {
+                    const removedInCol = toRemove.filter(([rr, cc]) => cc === c).length;
+                    for (let r = 0; r < removedInCol; r++) dropSet.add(`${r},${c}`);
+                }
+                const nextGrid = ref.grid.map(row => [...row]);
+                const nextPug = ref.powerUpGrid.map(row => [...row]);
+                const timer1 = setTimeout(() => {
+                    setAnimatingOut(new Set());
+                    setGrid(nextGrid);
+                    setPowerUpGrid(nextPug);
+                    setScore(ref.score);
+                    addScorePopup(points);
+                    requestAnimationFrame(() => setAnimatingDrop(dropSet));
+                }, POP_MS);
+                const timer2 = setTimeout(() => {
+                    setAnimatingDrop(new Set());
+                    setBonusPhaseRemaining(ref.remaining);
+                }, POP_MS + DROP_MS);
+                return () => { clearTimeout(timer1); clearTimeout(timer2); };
+            }, [bonusPhaseRemaining, levelIndex]);
+
+            useEffect(() => {
+                let cancelled = false;
+                Promise.all(CANDY_IMAGE_SRCS.map(src => removeImageBackground(src)))
+                    .then(urls => { if (!cancelled) setCandyUrls(urls); })
+                    .catch(() => {});
+                return () => { cancelled = true; };
+            }, []);
+            useEffect(() => {
+                let cancelled = false;
+                const keys = Object.keys(POWERUP_IMAGE_SRCS);
+                Promise.all(keys.map(k => removeImageBackground(POWERUP_IMAGE_SRCS[k])))
+                    .then(urls => {
+                        if (cancelled) return;
+                        const obj = {};
+                        keys.forEach((k, i) => { obj[k] = urls[i]; });
+                        setPowerupUrls(obj);
+                    })
+                    .catch(() => {});
+                return () => { cancelled = true; };
+            }, []);
+            return (
+                <div className="game-screen" style={styles.gameScreen}>
+                    <div className="game-bg" aria-hidden="true" />
+                    {scorePopups.map(p => (
+                        <div key={p.id} className="score-pop">+{p.value}</div>
+                    ))}
+                    <div className="game-hud" style={styles.hud}>
+                        <div className="hearts-wrap hud-pill" style={styles.statPill} aria-label={`${hearts} lives`}>
+                            {Array.from({ length: 5 }, (_, i) => (
+                                <span key={i} className={'heart ' + (i < hearts ? 'heart--full' : 'heart--empty')}>{i < hearts ? '♥' : '♡'}</span>
+                            ))}
+                        </div>
+                        <div className="hud-pill" style={styles.statPill}><span style={styles.statLabel}>Level</span> <span style={styles.statValueMoves}>{levelIndex + 1}</span></div>
+                        <div className="hud-pill" style={styles.statPill}><span style={styles.statLabel}>Score</span> <span style={styles.statValue}>{score}</span> <span style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>/ {level.targetScore}</span></div>
+                        <div className="hud-pill" style={styles.statPill}><span style={styles.statLabel}>Moves</span> <span style={styles.statValueMoves}>{movesLeft}</span></div>
+                        <button type="button" className="game-pause-btn" style={styles.pauseBtn} onClick={() => !gameOver && setIsPaused(true)} aria-label="Pause">{/* pause icon */}<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
+                    </div>
+                    <div className="grid-wrap" style={styles.gridWrap} ref={boardRef}>
+                        <div className="board-outer">
+                        <div className="board-inner">
+                        <div style={styles.grid}>
+                            {grid.map((row, r) => row.map((candy, c) => {
+                                const key = `${r},${c}`;
+                                const isDragStart = dragStart && dragStart.r === r && dragStart.c === c;
+                                const isDragCurrent = dragCurrent && dragCurrent.r === r && dragCurrent.c === c;
+                                const isSelected = isDragStart || isDragCurrent;
+                                const pu = powerUpGrid[r][c];
+                                const isSwapFrom = swapAnim && swapAnim.r1 === r && swapAnim.c1 === c;
+                                const isSwapTo = swapAnim && swapAnim.r2 === r && swapAnim.c2 === c;
+                                const swapStyle = (isSwapFrom || isSwapTo) && swapAnim ? {
+                                    '--swap-dx': `${(isSwapFrom ? swapAnim.c2 - swapAnim.c1 : swapAnim.c1 - swapAnim.c2) * 100}%`,
+                                    '--swap-dy': `${(isSwapFrom ? swapAnim.r2 - swapAnim.r1 : swapAnim.r1 - swapAnim.r2) * 100}%`
+                                } : undefined;
+                                return (
+                                    <div
+                                        key={key}
+                                        role="button"
+                                        tabIndex={0}
+                                        data-row={r}
+                                        data-type={candy}
+                                        className={'candy-cell' + (animatingOut.has(key) ? ' popping' : '') + (animatingDrop.has(key) ? ' dropping' : '') + (isSelected && dragStart && (dragStart.r !== dragCurrent?.r || dragStart.c !== dragCurrent?.c) ? ' selected' : '') + ((isSwapFrom || isSwapTo) ? ' swap-anim' : '') + (pu ? ' ' + pu : '')}
+                                        style={swapStyle ? { ...styles.candy, ...swapStyle } : styles.candy}
+                                        data-col={c}
+                                        onPointerDown={(e) => { e.preventDefault(); handlePointerDown(r, c, e.pointerId); }}
+                                        onPointerEnter={() => handlePointerEnter(r, c)}
+                                    >
+                                        <div className="candy-inner">
+                                            <CandyIcon type={candy} cellKey={key} powerUp={pu} candyUrls={candyUrls} powerupUrls={powerupUrls} />
+                                        </div>
+                                    </div>
+                                );
+                            }))}
+                        </div>
+                        </div>
+                        </div>
+                    </div>
+                    {isPaused && !gameOver && (
+                        <div style={styles.overlay}>
+                            <div style={styles.overlayTitle}>Paused</div>
+                            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                                <button className="overlay-btn" style={styles.overlayBtn} onClick={() => setIsPaused(false)}>Resume</button>
+                                <button className="overlay-btn" style={{ ...styles.overlayBtn, background: 'var(--color-surface)', border: '1px solid var(--color-border-strong)', color: 'var(--color-text)' }} onClick={() => onGameOver && onGameOver(score, levelIndex, false)}>Return to Home</button>
+                            </div>
+                        </div>
+                    )}
+                    {gameOver && (
+                        <div style={styles.overlay}>
+                            <div style={styles.overlayTitle}>{levelResult === 'win' ? 'Level Complete!' : 'Game Over'}</div>
+                            {levelResult === 'win' && (
+                                <div className="level-stars" style={{ display: 'flex', gap: 8, marginBottom: 12, justifyContent: 'center' }}>
+                                    {[1, 2, 3].map(i => (
+                                        <span key={i} className={'star' + (i <= stars ? ' star-filled' : ' star-empty')} style={{ fontSize: '2.5rem', lineHeight: 1 }} aria-label={i <= stars ? `${i} star` : `${i} star empty`}>★</span>
+                                    ))}
+                                </div>
+                            )}
+                            <div style={styles.overlayScore}>Score <span style={styles.overlayScoreNum}>{score}</span></div>
+                            {levelResult === 'win' && <div style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Target was {level.targetScore}</div>}
+                            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                                {levelResult === 'win' && levelIndex < LEVELS.length - 1 && (
+                                    <button className="overlay-btn" style={styles.overlayBtn} onClick={() => { if (onLevelComplete) onLevelComplete(levelIndex); if (onNextLevel) onNextLevel(levelIndex); }}>Next Level</button>
+                                )}
+                                {levelResult === 'lose' && <button className="overlay-btn" style={styles.overlayBtn} onClick={() => { setGameOver(false); setLevelResult(null); setStars(0); setBonusPhaseRemaining(0); bonusPhaseRef.current = null; setGrid(createGrid(level.numCandyTypes)); setPowerUpGrid(Array(ROWS).fill(null).map(() => Array(COLS).fill(null))); setScore(0); setMovesLeft(level.moves); }}>Retry</button>}
+                                <button className="overlay-btn" style={{ ...styles.overlayBtn, background: levelResult === 'win' ? 'var(--color-surface)' : undefined, border: '1px solid var(--color-border-strong)' }} onClick={() => onGameOver && onGameOver(score, levelIndex, levelResult === 'win')}>Back to Menu</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const styles = {
+            gameScreen: { width: '100%', minHeight: '100vh', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1, touchAction: 'none', overscrollBehavior: 'none' },
+            hud: { position: 'absolute', top: 18, left: 18, right: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10, gap: 10 },
+            statPill: { background: 'rgba(38,34,55,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', padding: '14px 20px', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', color: 'var(--color-text)', fontWeight: 700, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 6px 24px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.04) inset' },
+            statLabel: { color: 'var(--color-text-muted)', fontSize: '0.7rem', marginRight: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' },
+            statValue: { color: 'var(--color-accent)', fontWeight: 800, letterSpacing: '-0.02em' },
+            statValueMoves: { color: 'var(--color-accent-2)', fontWeight: 800, letterSpacing: '-0.02em' },
+            gridWrap: { width: '100%', maxWidth: 400, display: 'flex', justifyContent: 'center', zIndex: 2, padding: '0 16px', touchAction: 'none' },
+            grid: { display: 'grid', gridTemplateColumns: `repeat(${COLS}, 1fr)`, gap: 5, width: 'min(84vmin, 320px)', height: 'min(84vmin, 320px)', flexShrink: 0, contain: 'layout style paint' },
+            candy: { width: '100%', height: '100%', padding: 0 },
+            overlay: { position: 'absolute', inset: 0, background: 'rgba(24,20,36,0.94)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 32, zIndex: 100, padding: 32 },
+            overlayTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem, 9vw, 3.2rem)', fontWeight: 400, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.08, textShadow: '0 4px 24px rgba(0,0,0,0.5), 0 0 40px rgba(255,120,160,0.18)' },
+            overlayScore: { fontSize: '1.1rem', color: 'var(--color-text-muted)', fontWeight: 600, letterSpacing: '0.03em' },
+            overlayScoreNum: { color: 'var(--color-accent)', fontWeight: 800, fontSize: '1.65rem', textShadow: '0 0 28px rgba(255,120,160,0.45)' },
+            overlayBtn: { padding: '18px 44px', background: 'linear-gradient(165deg, #ff80a2 0%, #ff7098 42%, #ffc04d 100%)', color: '#0c0a0e', border: 'none', borderRadius: 'var(--radius-lg)', fontWeight: 700, cursor: 'pointer', fontSize: '1.05rem', fontFamily: 'var(--font-ui)', boxShadow: '0 0 0 1px rgba(255,255,255,0.28) inset, 0 4px 0 rgba(0,0,0,0.15), 0 12px 36px rgba(255,115,155,0.4)', transition: 'transform 0.2s ease, box-shadow 0.2s ease' },
+            pauseBtn: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 46, height: 46, padding: 0, border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', background: 'rgba(38,34,55,0.92)', color: 'var(--color-text)', cursor: 'pointer', flexShrink: 0, boxShadow: '0 6px 24px rgba(0,0,0,0.18)' }
+        };
+
+        const STORAGE_KEY = 'seeker_crush_unlocked_level';
+        const HEARTS_MAX = 5;
+        const REFILL_MS = 30 * 60 * 1000;
+        const STORAGE_KEY_HEARTS = 'seeker_crush_hearts';
+        function getStoredUnlocked() {
+            try {
+                const v = parseInt(localStorage.getItem(STORAGE_KEY) || '1', 10);
+                return Math.min(20, Math.max(1, isNaN(v) ? 1 : v));
+            } catch (_) { return 1; }
+        }
+        function getHeartsState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_HEARTS);
+                let hearts = HEARTS_MAX, lastRefillAt = Date.now();
+                if (raw) {
+                    const o = JSON.parse(raw);
+                    hearts = Math.min(HEARTS_MAX, Math.max(0, parseInt(o.hearts, 10) || HEARTS_MAX));
+                    lastRefillAt = parseInt(o.lastRefillAt, 10) || Date.now();
+                }
+                const now = Date.now();
+                const elapsed = now - lastRefillAt;
+                const toAdd = Math.min(HEARTS_MAX - hearts, Math.floor(elapsed / REFILL_MS));
+                if (toAdd > 0) {
+                    hearts += toAdd;
+                    lastRefillAt = now;
+                    try { localStorage.setItem(STORAGE_KEY_HEARTS, JSON.stringify({ hearts, lastRefillAt })); } catch (_) {}
+                }
+                return { hearts, lastRefillAt };
+            } catch (_) { return { hearts: HEARTS_MAX, lastRefillAt: Date.now() }; }
+        }
+        function saveHearts(hearts, lastRefillAt) {
+            try { localStorage.setItem(STORAGE_KEY_HEARTS, JSON.stringify({ hearts: Math.min(HEARTS_MAX, Math.max(0, hearts)), lastRefillAt })); } catch (_) {}
+        }
+
+        function App() {
+            const [screen, setScreen] = useState('menu');
+            const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
+            const [unlockedLevel, setUnlockedLevel] = useState(() => getStoredUnlocked());
+            const [heartsState, setHeartsState] = useState(() => getHeartsState());
+            const hearts = heartsState.hearts;
+            const lastRefillAt = heartsState.lastRefillAt;
+            const refreshHearts = () => setHeartsState(getHeartsState());
+            useEffect(() => { if (screen === 'menu' || screen === 'levels') refreshHearts(); }, [screen]);
+            useEffect(() => { const t = setInterval(refreshHearts, 60000); return () => clearInterval(t); }, []);
+            const [walletAddress, setWalletAddress] = useState(null);
+            const [skrName, setSkrName] = useState(null);
+            const [leaderboard, setLeaderboard] = useState([]);
+            const adapter = window.__snakeWalletAdapter;
+
+            useEffect(() => {
+                if (adapter?.connectedAccount?.address) {
+                    setWalletAddress(adapter.connectedAccount.address);
+                    const apiBase = typeof location !== 'undefined' ? location.origin : '';
+                    fetch(`${apiBase}/api/get-skr-domain?wallet=${encodeURIComponent(adapter.connectedAccount.address)}`)
+                        .then(r => r.json()).then(d => { if (d.domain) setSkrName(d.domain); }).catch(() => {});
+                } else {
+                    setWalletAddress(null);
+                    setSkrName(null);
+                }
+            }, [adapter?.connectedAccount?.address]);
+
+            useEffect(() => {
+                if (screen !== 'leaderboard' || !supabase) return;
+                supabase.rpc('get_best_scores', { p_game_mode: 'seeker_crush', p_difficulty: 'classic' })
+                    .then(({ data }) => setLeaderboard(data || []))
+                    .catch(() => setLeaderboard([]));
+            }, [screen]);
+
+            const connectWallet = async () => {
+                if (adapter?.connect) await adapter.connect();
+            };
+            const disconnectWallet = () => {
+                if (adapter?.disconnect) adapter.disconnect();
+            };
+
+            const menuStyle = {
+                minHeight: '100vh',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                padding: '56px 28px', maxWidth: 420, margin: '0 auto'
+            };
+            const btnPrimary = {
+                width: '100%', maxWidth: 320, padding: '20px 36px',
+                background: 'linear-gradient(165deg, #ff80a2 0%, #ff7098 38%, #ffc04d 100%)',
+                color: '#0c0a0e', border: 'none', borderRadius: 'var(--radius-lg)',
+                fontSize: '1.05rem', fontWeight: 700, cursor: 'pointer', marginBottom: 12,
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.3) inset, 0 4px 0 rgba(0,0,0,0.14), 0 12px 36px rgba(255,115,155,0.35)',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                fontFamily: 'var(--font-ui)'
+            };
+            const btnSecondary = {
+                ...btnPrimary, background: 'rgba(255,255,255,0.07)', color: 'var(--color-text)',
+                border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 4px 18px rgba(0,0,0,0.18)', marginBottom: 12
+            };
+
+            return (
+                <div style={{ height: '100vh', overflow: 'hidden', background: screen === 'game' ? 'transparent' : 'var(--color-bg)', color: 'var(--color-text)', fontFamily: 'var(--font-ui)' }}>
+                    {screen === 'menu' && (
+                        <div className="menu-fall-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                            <div className="menu-fall-bg" aria-hidden="true">
+                                {[
+                                    { left: '8%', delay: 0, candy: 0 },
+                                    { left: '22%', delay: 2, candy: 1 },
+                                    { left: '38%', delay: 4, candy: 2 },
+                                    { left: '54%', delay: 1, candy: 3 },
+                                    { left: '70%', delay: 3, candy: 4 },
+                                    { left: '86%', delay: 5, candy: 0 },
+                                    { left: '15%', delay: 7, candy: 1 },
+                                    { left: '78%', delay: 6, candy: 2 },
+                                    { left: '45%', delay: 8, candy: 3 },
+                                    { left: '62%', delay: 3.5, candy: 4 },
+                                    { left: '30%', delay: 5.5, candy: 0 },
+                                    { left: '92%', delay: 1.5, candy: 1 },
+                                ].map((c, i) => (
+                                    <div
+                                        key={i}
+                                        className="menu-fall-candy"
+                                        style={{ left: c.left, animationDelay: `${c.delay}s` }}
+                                    >
+                                        <img src={CANDY_IMAGE_SRCS[c.candy]} alt="" draggable={false} />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="menu-content" style={menuStyle}>
+                                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.75rem, 11vw, 3.75rem)', fontWeight: 400, marginBottom: 10, letterSpacing: '-0.04em', lineHeight: 1.05, textShadow: '0 4px 20px rgba(0,0,0,0.35)', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.06em' }}>
+                                    <span style={{ color: 'var(--color-text)' }}>Seeker</span>
+                                    <span style={{ background: 'linear-gradient(135deg, #ff90b0 0%, #ffcc5c 48%, #ff7a9e 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Crush</span>
+                                </h1>
+                                <p style={{ fontFamily: 'var(--font-premium)', color: 'var(--color-text-muted)', fontSize: '0.7rem', marginBottom: 8, letterSpacing: '0.32em', textTransform: 'uppercase', fontWeight: 600 }}>Solana dApp</p>
+                                <div className="hearts-wrap" style={{ marginBottom: 36 }} aria-label={`${hearts} lives`}>
+                                    {Array.from({ length: HEARTS_MAX }, (_, i) => (
+                                        <span key={i} className={'heart ' + (i < hearts ? 'heart--full' : 'heart--empty')}>{i < hearts ? '♥' : '♡'}</span>
+                                    ))}
+                                </div>
+                                <button className="menu-btn-primary" style={btnPrimary} onClick={() => setScreen('levels')}>Play</button>
+                                <button className="menu-btn-primary" style={btnPrimary} onClick={() => setScreen('leaderboard')}>Leaderboard</button>
+                                <div style={{ marginTop: 32, paddingTop: 32, borderTop: '1px solid var(--color-border)', width: '100%', maxWidth: 320, textAlign: 'center' }}>
+                                    {walletAddress ? (
+                                        <>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--color-accent)', marginBottom: 12, fontWeight: 600 }}>{skrName || walletAddress.slice(0,8)+'…'}</div>
+                                            <button style={{ ...btnSecondary, padding: '12px 24px', fontSize: '0.9rem' }} onClick={disconnectWallet}>Disconnect</button>
+                                        </>
+                                    ) : (
+                                        <button className="menu-btn-primary" style={btnPrimary} onClick={connectWallet}>Connect Wallet</button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {screen === 'game' && (
+                        <Match3Game
+                            key={currentLevelIndex}
+                            levelIndex={currentLevelIndex}
+                            hearts={hearts}
+                            onGameOver={(finalScore, levelIdx, won) => {
+                                if (won && levelIdx != null) {
+                                    const next = Math.max(unlockedLevel, levelIdx + 2);
+                                    setUnlockedLevel(next);
+                                    try { localStorage.setItem(STORAGE_KEY, String(next)); } catch (_) {}
+                                }
+                                if (!won) {
+                                    const nextHearts = Math.max(0, hearts - 1);
+                                    const now = Date.now();
+                                    saveHearts(nextHearts, now);
+                                    setHeartsState({ hearts: nextHearts, lastRefillAt: now });
+                                }
+                                setScreen('menu');
+                            }}
+                            onLevelComplete={(levelIdx) => {
+                                const next = Math.max(unlockedLevel, levelIdx + 2);
+                                setUnlockedLevel(next);
+                                try { localStorage.setItem(STORAGE_KEY, String(next)); } catch (_) {}
+                            }}
+                            onNextLevel={(levelIdx) => setCurrentLevelIndex(levelIdx + 1)}
+                            walletAddress={walletAddress}
+                            skrName={skrName}
+                        />
+                    )}
+                    {screen === 'levels' && (
+                        <div className="level-world-wrap">
+                            <button className="level-world__back" onClick={() => setScreen('menu')}>← Back</button>
+                            <div className="level-world">
+                                <div className="level-world__scroll">
+                                    <header className="level-world__header">
+                                        <h2 className="level-world__title">Levels</h2>
+                                        <p className="level-world__subtitle">{unlockedLevel} of 20 unlocked</p>
+                                        <div className="hearts-wrap" style={{ marginTop: 8 }} aria-label={`${hearts} lives`}>
+                                            {Array.from({ length: HEARTS_MAX }, (_, i) => (
+                                                <span key={i} className={'heart ' + (i < hearts ? 'heart--full' : 'heart--empty')}>{i < hearts ? '♥' : '♡'}</span>
+                                            ))}
+                                        </div>
+                                        {hearts < 1 && (() => { const mins = Math.max(0, Math.ceil((lastRefillAt + REFILL_MS - Date.now()) / 60000)); return (
+                                            <p className="level-world__subtitle" style={{ marginTop: 8, color: 'var(--color-accent)', fontWeight: 600 }}>
+                                                Out of lives — next heart in {mins === 0 ? '< 1' : mins} min
+                                            </p>
+                                        ); })()}
+                                    </header>
+                                    <div className="level-world__grid-wrap">
+                                        <div className="level-world__grid">
+                                        {LEVELS.map((lev, i) => {
+                                            const levelNum = i + 1;
+                                            const unlocked = levelNum <= unlockedLevel;
+                                            const completed = levelNum < unlockedLevel;
+                                            return (
+                                                <button
+                                                    key={i}
+                                                    type="button"
+                                                    className={'level-card' + (!unlocked ? ' level-card--locked' : completed ? ' level-card--completed' : '')}
+                                                    onClick={() => { if (!unlocked) return; if (hearts < 1) return; setCurrentLevelIndex(i); setScreen('game'); }}
+                                                >
+                                                    {!unlocked && <span className="level-card__lock" aria-hidden="true">🔒</span>}
+                                                    <span className="level-card__num">{levelNum}</span>
+                                                    <span className="level-card__meta">{lev.targetScore} pts</span>
+                                                    {completed && (
+                                                        <span className="level-card__stars" aria-label="Completed">
+                                                            <span className="star-on">★</span><span className="star-on">★</span><span className="star-on">★</span>
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {screen === 'leaderboard' && (
+                        <div style={{ ...menuStyle, alignItems: 'stretch', maxWidth: 420 }}>
+                            <h2 style={{ marginBottom: 22, fontWeight: 700, fontSize: '1.45rem', letterSpacing: '-0.02em', color: 'var(--color-text)' }}>Leaderboard</h2>
+                            <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 22, boxShadow: 'var(--shadow-strong)' }}>
+                                <div style={{ display: 'flex', padding: '14px 20px', background: 'rgba(42,38,58,0.7)', borderBottom: '1px solid var(--color-border)', fontSize: '0.66rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--color-text-muted)' }}>
+                                    <span style={{ flex: 1 }}>Rank</span>
+                                    <span style={{ flex: 2 }}>Player</span>
+                                    <span style={{ width: 64, textAlign: 'right' }}>Score</span>
+                                </div>
+                                {leaderboard.slice(0, 20).map((entry, i) => (
+                                    <div key={entry.wallet_address + i} style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: i < 19 ? '1px solid var(--color-border)' : 'none', fontSize: '0.95rem' }}>
+                                        <span style={{ flex: 1, fontWeight: 700, color: 'var(--color-text-muted)' }}>#{i + 1}</span>
+                                        <span style={{ flex: 2, fontWeight: 500, color: 'var(--color-text)' }}>{entry.skr_name || entry.wallet_address?.slice(0, 8) + '…'}</span>
+                                        <span style={{ width: 64, textAlign: 'right', fontWeight: 700, color: 'var(--color-accent)' }}>{entry.best_score}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <button style={{ ...btnSecondary, marginTop: 0 }} onClick={() => setScreen('menu')}>Back</button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function hideLoadingAndRender() {
+            const loading = document.getElementById('cc-loading');
+            if (loading) loading.style.display = 'none';
+            const root = document.getElementById('root');
+            if (!root) return;
+            try {
+                if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined' && ReactDOM.createRoot) {
+                    ReactDOM.createRoot(root).render(<App />);
+                } else {
+                    root.innerHTML = '<p style="color:#fff;padding:20px;text-align:center;">Failed to load. Check console.</p>';
+                }
+            } catch (e) {
+                root.innerHTML = '<p style="color:#ff6b6b;padding:20px;text-align:center;">Error: ' + (e.message || String(e)) + '</p>';
+                console.error(e);
+            }
+        }
+
+        function init() {
+            const bar = document.getElementById('cc-loading-bar');
+            let w = 0;
+            const t = setInterval(() => {
+                w += 8;
+                if (bar) bar.style.width = Math.min(w, 100) + '%';
+                if (w >= 100) {
+                    clearInterval(t);
+                    hideLoadingAndRender();
+                }
+            }, 30);
+            // Fallback: if still loading after 2.5s, show app anyway
+            setTimeout(function() {
+                const loading = document.getElementById('cc-loading');
+                if (loading && loading.style.display !== 'none') {
+                    if (bar) bar.style.width = '100%';
+                    hideLoadingAndRender();
+                }
+            }, 2500);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
