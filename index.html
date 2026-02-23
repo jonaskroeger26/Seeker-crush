@@ -506,18 +506,23 @@
     <meta name="apple-mobile-web-app-title" content="Seeker Crush">
     <title>Seeker Crush - Solana</title>
     <link rel="manifest" href="manifest.json">
-    <script defer src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
-    <script defer src="https://unpkg.com/@onsol/tldparser@0.5.2/lib/index.iife.js"></script>
-    <script defer crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script defer crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script defer src="/mwa-bundle.js"></script>
+    <!-- Load wallet deps first (no defer) so adapter is ready before React -->
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@onsol/tldparser@0.5.2/lib/index.iife.js"></script>
+    <script src="mwa-bundle.js"></script>
     <script>
         if (typeof window.__snakeWalletAdapter === 'undefined') {
             window.__snakeWalletAdapter = { ready: false, connect: null, disconnect: null };
         }
+        window.checkMWA = function() {
+            var a = window.__snakeWalletAdapter;
+            return { adapterExists: !!a, ready: a && a.ready, hasConnect: typeof (a && a.connect) === 'function', connected: !!(a && (a.connected || a.connectedAccount)), address: a && a.connectedAccount && a.connectedAccount.address };
+        };
     </script>
+    <script defer crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script defer crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div id="cc-loading">
@@ -1451,19 +1456,21 @@ for (let c = 0; c < ref.cols; c++) {
             const [walletAddress, setWalletAddress] = useState(null);
             const [skrName, setSkrName] = useState(null);
             const [leaderboard, setLeaderboard] = useState([]);
-            const adapter = window.__snakeWalletAdapter;
+            const [walletConnecting, setWalletConnecting] = useState(false);
 
             useEffect(() => {
-                if (adapter?.connectedAccount?.address) {
-                    setWalletAddress(adapter.connectedAccount.address);
+                const a = window.__snakeWalletAdapter;
+                const addr = a && a.connectedAccount && a.connectedAccount.address;
+                if (addr) {
+                    setWalletAddress(addr);
                     const apiBase = typeof location !== 'undefined' ? location.origin : '';
-                    fetch(`${apiBase}/api/get-skr-domain?wallet=${encodeURIComponent(adapter.connectedAccount.address)}`)
-                        .then(r => r.json()).then(d => { if (d.domain) setSkrName(d.domain); }).catch(() => {});
+                    fetch(`${apiBase}/api/get-skr-domain?wallet=${encodeURIComponent(addr)}`)
+                        .then(r => r.json()).then(d => { if (d && d.domain) setSkrName(d.domain); }).catch(() => {});
                 } else {
                     setWalletAddress(null);
                     setSkrName(null);
                 }
-            }, [adapter?.connectedAccount?.address]);
+            }, []);
 
             useEffect(() => {
                 if (screen !== 'leaderboard' || !supabase) return;
@@ -1473,10 +1480,44 @@ for (let c = 0; c < ref.cols; c++) {
             }, [screen]);
 
             const connectWallet = async () => {
-                if (adapter?.connect) await adapter.connect();
+                setWalletConnecting(true);
+                try {
+                    let a = window.__snakeWalletAdapter;
+                    const isAndroid = /android/i.test(navigator.userAgent);
+                    const isInApp = !!(window.__SNAKE_IN_APP || window.ReactNativeWebView);
+                    if ((isAndroid || isInApp) && (!a || typeof a.connect !== 'function')) {
+                        for (let i = 0; i < 30; i++) {
+                            await new Promise(r => setTimeout(r, 200));
+                            a = window.__snakeWalletAdapter;
+                            if (a && typeof a.connect === 'function') break;
+                        }
+                    }
+                    a = window.__snakeWalletAdapter;
+                    if (!a || typeof a.connect !== 'function') {
+                        alert('Wallet not available. On Seeker use the built-in wallet; on other devices install Phantom.');
+                        return;
+                    }
+                    const result = await a.connect();
+                    const addr = typeof result === 'string' ? result : (result && (result.address || result.publicKey && result.publicKey.toString()));
+                    if (addr) {
+                        setWalletAddress(addr);
+                        const apiBase = typeof location !== 'undefined' ? location.origin : '';
+                        fetch(`${apiBase}/api/get-skr-domain?wallet=${encodeURIComponent(addr)}`)
+                            .then(r => r.json()).then(d => { if (d && d.domain) setSkrName(d.domain); }).catch(() => {});
+                    }
+                } catch (err) {
+                    if (err && err.message) alert(err.message);
+                } finally {
+                    setWalletConnecting(false);
+                }
             };
-            const disconnectWallet = () => {
-                if (adapter?.disconnect) adapter.disconnect();
+            const disconnectWallet = async () => {
+                const a = window.__snakeWalletAdapter;
+                if (a && typeof a.disconnect === 'function') {
+                    try { await a.disconnect(); } catch (_) {}
+                }
+                setWalletAddress(null);
+                setSkrName(null);
             };
 
             const menuStyle = {
@@ -1546,7 +1587,9 @@ for (let c = 0; c < ref.cols; c++) {
                                             <button style={{ ...btnSecondary, padding: '12px 24px', fontSize: '0.9rem' }} onClick={disconnectWallet}>Disconnect</button>
                                         </>
                                     ) : (
-                                        <button className="menu-btn-primary" style={btnPrimary} onClick={connectWallet}>Connect Wallet</button>
+                                        <button className="menu-btn-primary" style={btnPrimary} onClick={connectWallet} disabled={walletConnecting}>
+                                            {walletConnecting ? 'Connecting…' : 'Connect Wallet'}
+                                        </button>
                                     )}
                                 </div>
                             </div>
